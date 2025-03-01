@@ -1,61 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>MedTech AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functional and Performance Requirements</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 2em; }
-        #output { white-space: pre-wrap; background: #f0f0f0; padding: 1em; }
+        body {
+            background-color: #000; 
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            width: 50%;
+            min-width: 300px;
+        }
+        label {
+            font-size: 18px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output-box {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            width: 90%;
+            text-align: left;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body>
-    <h1>MedTech AI Design Inputs</h1>
-    <p>Enter the generic name of a medical device:</p>
-    <input type="text" id="deviceName" placeholder="e.g., Knee Implant">
-    <button onclick="fetchData()">Go</button>
-    <h3>Results:</h3>
-    <div id="output"></div>
+
+    <h1>Functional and Performance Requirements</h1>
+    
+    <div class="container">
+        <label for="deviceName">Generic Device:</label>
+        <input type="text" id="deviceName" placeholder="e.g., Knee Implant">
+        <button onclick="fetchData()">Go</button>
+        
+        <h3>Details:</h3>
+        <div class="output-box" id="output">Results will appear here...</div>
+    </div>
 
     <script>
-        // Your DeepSeek API key (for demo purposes only—do not expose in production)
-        const apiKey = "sk-ea455bdc6b5d4ca3aa9e9bde98c7c8b0";
-
         async function fetchData() {
-            const deviceName = document.getElementById("deviceName").value.trim();
+            var deviceName = document.getElementById("deviceName").value.trim();
             if (!deviceName) {
                 alert("Please enter a device name");
                 return;
             }
 
-            // Construct the prompt for design inputs.
-            const prompt = `Provide Design Input - Functional and Performance Requirements for ${deviceName} based on ISO 13485, EU MDR, ASTM, and USFDA regulations.`;
+            // Mock response for testing
+            let mockResponse = {
+                "device_name": deviceName,
+                "requirements": "Material must comply with ASTM F75-07 for metallic prosthesis and ASTM F648-07 for plastic components. Design should follow ISO 13485 and EU MDR Annex I.",
+                "ISO_13485": "Ensure compliance with ISO 13485 for risk management and post-market surveillance.",
+                "EU_MDR": "Annex I, Chapter II: General Safety & Performance Requirements (GSPR).",
+                "ASTM": "ASTM F2083-6b: Dimensions must comply with ASTM F2083-6b.",
+                "US_FDA": "FDA Regulation 888.3560: Knee prosthesis must meet 21 CFR Part 820 Design Controls."
+            };
 
-            try {
-                // Call the DeepSeek API (Replace the URL and payload structure as needed)
-                const response = await fetch("https://api.deepseek.ai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: "deepseek-1",  // Update with the correct model if needed.
-                        messages: [{"role": "user", "content": prompt}]
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                // Assume the API returns a similar structure to OpenAI's ChatCompletion API
-                const result = data.choices && data.choices[0] && data.choices[0].message.content;
-                document.getElementById("output").innerText = result || "No result returned.";
-            } catch (error) {
-                document.getElementById("output").innerText = "Error: " + error;
-            }
+            document.getElementById("output").innerText = JSON.stringify(mockResponse, null, 2);
         }
     </script>
+
 </body>
 </html>
