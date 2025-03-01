@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MedTech AI</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        #output { white-space: pre-wrap; background: #f0f0f0; padding: 1em; }
+    </style>
+</head>
+<body>
+    <h1>MedTech AI Design Inputs</h1>
+    <p>Enter the generic name of a medical device:</p>
+    <input type="text" id="deviceName" placeholder="e.g., Knee Implant">
+    <button onclick="fetchData()">Go</button>
+    <h3>Results:</h3>
+    <div id="output"></div>
+
+    <script>
+        // Your DeepSeek API key (for demo purposes only—do not expose in production)
+        const apiKey = "sk-ea455bdc6b5d4ca3aa9e9bde98c7c8b0";
+
+        async function fetchData() {
+            const deviceName = document.getElementById("deviceName").value.trim();
+            if (!deviceName) {
+                alert("Please enter a device name");
+                return;
+            }
+
+            // Construct the prompt for design inputs.
+            const prompt = `Provide Design Input - Functional and Performance Requirements for ${deviceName} based on ISO 13485, EU MDR, ASTM, and USFDA regulations.`;
+
+            try {
+                // Call the DeepSeek API (Replace the URL and payload structure as needed)
+                const response = await fetch("https://api.deepseek.ai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-1",  // Update with the correct model if needed.
+                        messages: [{"role": "user", "content": prompt}]
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                // Assume the API returns a similar structure to OpenAI's ChatCompletion API
+                const result = data.choices && data.choices[0] && data.choices[0].message.content;
+                document.getElementById("output").innerText = result || "No result returned.";
+            } catch (error) {
+                document.getElementById("output").innerText = "Error: " + error;
+            }
+        }
+    </script>
+</body>
+</html>
