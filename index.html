@@ -1,101 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Functional and Performance Requirements</title>
-    <style>
-        body {
-            background-color: #000; 
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-            text-align: center;
-        }
-        h1 {
-            margin-bottom: 20px;
-        }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            width: 50%;
-            min-width: 300px;
-        }
-        label {
-            font-size: 18px;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 10px;
-        }
-        input {
-            width: 80%;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .output-box {
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 5px;
-            width: 90%;
-            text-align: left;
-            white-space: pre-wrap;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Design Input - Functional and Performance Requirement</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      width: 90%;
+      max-width: 800px;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    .input-container {
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 60%;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: blue;
+      color: white;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    button:hover {
+      opacity: 0.8;
+    }
+    .result-box {
+      background-color: #333;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: left;
+      white-space: pre-wrap;
+      min-height: 300px;
+    }
+  </style>
 </head>
 <body>
-
-    <h1>Functional and Performance Requirements</h1>
-    
-    <div class="container">
-        <label for="deviceName">Generic Device:</label>
-        <input type="text" id="deviceName" placeholder="e.g., Knee Implant">
-        <button onclick="fetchData()">Go</button>
-        
-        <h3>Details:</h3>
-        <div class="output-box" id="output">Results will appear here...</div>
+  <div class="container">
+    <h1>Design Input - Functional and Performance Requirement</h1>
+    <div class="input-container">
+      <input type="text" id="deviceName" placeholder="Generic Name">
+      <button id="goButton">Go</button>
     </div>
+    <div class="result-box" id="resultBox">
+      <!-- Results will be displayed here -->
+    </div>
+  </div>
 
-    <script>
-        async function fetchData() {
-            var deviceName = document.getElementById("deviceName").value.trim();
-            if (!deviceName) {
-                alert("Please enter a device name");
-                return;
-            }
+  <script>
+    document.getElementById('goButton').addEventListener('click', function() {
+      var deviceName = document.getElementById('deviceName').value.trim();
+      if (deviceName === "") {
+        alert("Please enter a device name.");
+        return;
+      }
 
-            // Mock response for testing
-            let mockResponse = {
-                "device_name": deviceName,
-                "requirements": "Material must comply with ASTM F75-07 for metallic prosthesis and ASTM F648-07 for plastic components. Design should follow ISO 13485 and EU MDR Annex I.",
-                "ISO_13485": "Ensure compliance with ISO 13485 for risk management and post-market surveillance.",
-                "EU_MDR": "Annex I, Chapter II: General Safety & Performance Requirements (GSPR).",
-                "ASTM": "ASTM F2083-6b: Dimensions must comply with ASTM F2083-6b.",
-                "US_FDA": "FDA Regulation 888.3560: Knee prosthesis must meet 21 CFR Part 820 Design Controls."
-            };
+      // Display a loading message
+      document.getElementById('resultBox').textContent = "Loading...";
 
-            document.getElementById("output").innerText = JSON.stringify(mockResponse, null, 2);
+      // Create the prompt with the provided device name
+      var promptText = 
+`Generic Device: ${deviceName}
+
+Please provide the Design Input - Functional and Performance Requirements in the following standard format:
+
+1. Material of Construction
+   - Primary Material(s): ...
+   - Applicable Standards:
+     - ASTM: ...
+     - ISO: ...
+     - EU MDR: ...
+
+2. Mechanical Properties
+   - Tensile Strength: ...
+   - Compressive Strength: ...
+   - Shear Strength: ...
+   - Flexibility and Elasticity: ...
+   - Fatigue Resistance: ...
+   - Applicable Standards:
+     - ASTM: ...
+     - ISO: ...
+     - EU MDR: ...
+
+3. Degradation Profile (if applicable)
+   - Absorption Time: ...
+   - Breakdown Mechanism: ...
+   - Degradation By-products: ...
+   - Applicable Standards:
+     - ASTM: ...
+     - ISO: ...
+     - EU MDR: ...
+
+4. Dimension and Structural Integrity
+   - Physical Dimensions: ...
+   - Surface Finish and Coating (if applicable): ...
+   - Load-Bearing Capacity: ...
+   - Durability Requirements: ...
+   - Applicable Standards:
+     - ASTM: ...
+     - ISO: ...
+     - EU MDR: ...
+
+5. Functional Requirements
+   - Primary Functionality: ...
+   - Compatibility: ...
+   - Deployment Mechanism (if applicable): ...
+   - Tissue Interaction (if applicable): ...
+   - Imaging Compatibility (if applicable): ...
+   - Applicable Standards:
+     - ASTM: ...
+     - ISO: ...
+     - EU MDR: ...
+
+6. Performance Criteria
+   - Retention Strength: ...
+   - Failure Threshold: ...
+   - Wear and Fatigue Resistance: ...
+   - Shelf Life and Storage Conditions: ...
+   - Sterility and Cleanliness (if applicable): ...
+   - Applicable Standards:
+     - ASTM: ...
+     - ISO: ...
+     - EU MDR: ...
+
+Please fill in the details accordingly.`;
+
+      // Call the OpenAI API (this is a client-side example; for production, use a secure server)
+      fetch('https://api.openai.com/v1/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer YOUR_API_KEY_HERE'
+        },
+        body: JSON.stringify({
+          model: 'text-davinci-003',
+          prompt: promptText,
+          max_tokens: 800,
+          temperature: 0.7
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.choices && data.choices.length > 0) {
+          document.getElementById('resultBox').textContent = data.choices[0].text.trim();
+        } else {
+          document.getElementById('resultBox').textContent = "No results returned.";
         }
-    </script>
-
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('resultBox').textContent = "An error occurred.";
+      });
+    });
+  </script>
 </body>
 </html>
