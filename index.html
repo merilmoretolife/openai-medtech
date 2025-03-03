@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-6">
-  <title>Design Input - Functional and Performance Requirement</title>
+  <meta charset="UTF-8">
+  <title>Functional and Performance Requirement</title>
   <style>
     body {
       background-color: black;
@@ -57,7 +57,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>Design Input - Functional and Performance Requirement</h1>
+    <h1>Functional and Performance Requirement</h1>
     <div class="input-container">
       <input type="text" id="deviceName" placeholder="Generic Name">
       <button id="goButton">Go</button>
@@ -80,7 +80,7 @@
 
       // Create the prompt with the provided device name
       var promptText = 
-`Generic Device: ${deviceName}
+`Medical Device Generic Device: ${deviceName}
 
 Please provide the Design Input - Functional and Performance Requirements in the following standard format:
 
@@ -145,7 +145,6 @@ Please provide the Design Input - Functional and Performance Requirements in the
 
 Please fill in the details accordingly.`;
 
-      // Call the OpenAI API (this is a client-side example; for production, use a secure server)
       fetch('https://api.openai.com/v1/completions', {
         method: 'POST',
         headers: {
