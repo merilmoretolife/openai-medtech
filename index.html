@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Functional and Performance Requirements</title>
+  <title>Design Input - Functional and Performance Requirement</title>
   <style>
     body {
       background-color: black;
@@ -57,9 +57,9 @@
 </head>
 <body>
   <div class="container">
-    <h1>Functional and Performance Requirements</h1>
+    <h1>Design Input - Functional and Performance Requirement</h1>
     <div class="input-container">
-      <input type="text" id="deviceName" placeholder="Medical Device Generic Name">
+      <input type="text" id="deviceName" placeholder="Generic Name">
       <button id="goButton">Go</button>
     </div>
     <div class="result-box" id="resultBox">
@@ -75,12 +75,11 @@
         return;
       }
 
-      // Display a loading message
-      document.getElementById('resultBox').textContent = "Loading...";
+      var resultBox = document.getElementById('resultBox');
+      resultBox.textContent = "Loading...";
 
-      // Create the prompt with the provided device name
       var promptText = 
-`Medical Device Generic Device: ${deviceName}
+`Generic Device: ${deviceName}
 
 Please provide the Design Input - Functional and Performance Requirements in the following standard format:
 
@@ -145,6 +144,7 @@ Please provide the Design Input - Functional and Performance Requirements in the
 
 Please fill in the details accordingly.`;
 
+      // Call the OpenAI API
       fetch('https://api.openai.com/v1/completions', {
         method: 'POST',
         headers: {
@@ -158,17 +158,23 @@ Please fill in the details accordingly.`;
           temperature: 0.7
         })
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("HTTP error " + response.status);
+        }
+        return response.json();
+      })
       .then(data => {
-        if (data.choices && data.choices.length > 0) {
-          document.getElementById('resultBox').textContent = data.choices[0].text.trim();
+        console.log("Response Data:", data); // Log the full response for debugging
+        if (data.choices && data.choices.length > 0 && data.choices[0].text) {
+          resultBox.textContent = data.choices[0].text.trim();
         } else {
-          document.getElementById('resultBox').textContent = "No results returned.";
+          resultBox.textContent = "No results returned. Please check the API response.";
         }
       })
       .catch(error => {
         console.error('Error:', error);
-        document.getElementById('resultBox').textContent = "An error occurred.";
+        resultBox.textContent = "An error occurred: " + error.message;
       });
     });
   </script>
