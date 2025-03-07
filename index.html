@@ -9,15 +9,14 @@
     <style>
         /* General Page Styling */
         body {
-            background-color: black;
-            color: white;
-            font-family: 'Arial', sans-serif;
+            background-color: white;
+            color: black;
+            font-family: 'Helvetica', sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
             text-align: center;
         }
 
@@ -25,7 +24,7 @@
         h1 {
             font-size: 26px;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin: 20px 0;
         }
 
         /* Main Container */
@@ -33,11 +32,12 @@
             width: 50%;
             padding: 20px;
             border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.05);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-bottom: 50px; /* Ensures proper scrolling */
         }
 
         /* Input Section */
@@ -55,9 +55,9 @@
             width: 90%;
             font-size: 16px;
             border-radius: 5px;
-            border: 1px solid white;
-            background-color: #222;
-            color: white;
+            border: 1px solid black;
+            background-color: white;
+            color: black;
             text-align: center;
         }
 
@@ -81,28 +81,40 @@
         .result-box {
             margin-top: 20px;
             padding: 15px;
-            border: 1px solid white;
+            border: 1px solid black;
             width: 90%;
             min-height: 100px;
-            background-color: #222;
-            color: white;
+            background-color: white;
+            color: black;
             font-size: 16px;
             border-radius: 5px;
             text-align: left;
             overflow-wrap: break-word;
         }
+
+        /* Make Page Scrollable */
+        .content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
     </style>
 </head>
 <body>
-    <h1>Design Input - Functional & Performance Requirement</h1>
-    
-    <div class="container">
-        <div class="input-section">
-            <input type="text" id="deviceName" placeholder="Enter Generic Device Name">
-            <button onclick="fetchData()">Go</button>
-        </div>
+    <div class="content">
+        <h1>Design Input - Functional & Performance Requirement</h1>
+        
+        <div class="container">
+            <div class="input-section">
+                <input type="text" id="deviceName" placeholder="Enter Generic Device Name">
+                <button onclick="fetchData()">Go</button>
+            </div>
 
-        <div id="result" class="result-box">Awaiting Input...</div>
+            <div id="result" class="result-box">Awaiting Input...</div>
+        </div>
     </div>
 
     <script>
@@ -126,20 +138,12 @@
             }
         }
 
-        // Function to Format Response in Correct Structure
+        // Function to Format Response
         function formatResponse(text) {
-            // Remove unwanted "Design Input" title if present
-            text = text.replace(/^Design Input.*\n/, "");
-
-            // Convert Markdown **bold** to HTML <strong>
-            text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-            // Remove unnecessary bullet points (-)
-            text = text.replace(/- (.*?)\n/g, "$1<br>");
-
-            // Ensure line breaks and spacing
-            text = text.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>");
-
+            text = text.replace(/^Design Input.*\n/, ""); // Remove unnecessary title
+            text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"); // Convert **bold** to <strong>
+            text = text.replace(/- (.*?)\n/g, "$1<br>"); // Remove bullet points while keeping list items
+            text = text.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>"); // Convert newlines to <br>
             return text;
         }
     </script>
