@@ -21,24 +21,28 @@
             text-align: center;
         }
 
-        /* Main Container */
-        .container {
-            width: 60%;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
-        }
-
         /* Title Styling */
         h1 {
             font-size: 26px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+        }
+
+        /* Main Container */
+        .container {
+            width: 50%;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         /* Input Section */
         .input-section {
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -48,7 +52,7 @@
         /* Input Field */
         input {
             padding: 12px;
-            width: 80%;
+            width: 90%;
             font-size: 16px;
             border-radius: 5px;
             border: 1px solid white;
@@ -79,7 +83,7 @@
             padding: 15px;
             border: 1px solid white;
             width: 90%;
-            min-height: 50px;
+            min-height: 100px;
             background-color: #222;
             color: white;
             font-size: 16px;
@@ -87,22 +91,12 @@
             text-align: left;
             overflow-wrap: break-word;
         }
-
-        /* Bullet Point Styling */
-        .result-box ul {
-            list-style-type: disc;
-            padding-left: 20px;
-        }
-
-        .result-box li {
-            margin-bottom: 8px;
-        }
     </style>
 </head>
 <body>
+    <h1>Design Input - Functional & Performance Requirement</h1>
+    
     <div class="container">
-        <h1>Design Input - Functional & Performance Requirement</h1>
-
         <div class="input-section">
             <input type="text" id="deviceName" placeholder="Enter Generic Device Name">
             <button onclick="fetchData()">Go</button>
@@ -118,27 +112,35 @@
             document.getElementById('result').innerHTML = "<p>Loading...</p>";
 
             try {
-                const response = await fetch("https://1dacb17c-7b43-470b-a0b2-7b64e65a3211-00-1oi52096rimcn.pike.replit.dev/generate", {
+                const response = await fetch("https://your-replit-url.repl.co/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ deviceName })
                 });
 
                 const data = await response.json();
-                document.getElementById('result').innerHTML = formatMarkdown(data.result || "No data returned.");
+                document.getElementById('result').innerHTML = formatResponse(data.result || "No data returned.");
             } catch (error) {
                 console.error(error);
                 document.getElementById('result').textContent = "Error fetching data.";
             }
         }
 
-        // Function to Convert Markdown to HTML
-        function formatMarkdown(text) {
-            return text
-                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Convert **bold** to <strong>
-                .replace(/- (.*?)\n/g, "<li>$1</li>") // Convert "- bullet points" to <li>
-                .replace(/\n\n/g, "<br><br>") // Convert double newlines to breaks
-                .replace(/\n/g, "<br>"); // Convert single newlines to breaks
+        // Function to Format Response in Correct Structure
+        function formatResponse(text) {
+            // Remove unwanted "Design Input" title if present
+            text = text.replace(/^Design Input.*\n/, "");
+
+            // Convert Markdown **bold** to HTML <strong>
+            text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+            // Remove unnecessary bullet points (-)
+            text = text.replace(/- (.*?)\n/g, "$1<br>");
+
+            // Ensure line breaks and spacing
+            text = text.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>");
+
+            return text;
         }
     </script>
 </body>
