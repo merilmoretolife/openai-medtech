@@ -71,6 +71,17 @@
             margin-bottom: 15px;
         }
 
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        label {
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
         button {
             background-color: #4F7942;
             color: white;
@@ -113,35 +124,79 @@
     <div class="container">
         <div class="box left-box">
             <div class="title">Design Input</div>
-            <div class="subtitle">Functional and Performance Requirements</div>
+            <div class="subtitle">Select Sections</div>
             <input type="text" id="deviceName" placeholder="Enter Generic Device Name">
+            <label><input type="checkbox" id="functional" checked> Functional & Performance Requirements</label>
+            <label><input type="checkbox" id="biological" checked> Biological & Safety Requirements</label>
             <button onclick="fetchData()">Go</button>
         </div>
 
         <div class="box">
-            <div class="section-title">Functional and Performance Requirements</div>
+            <div id="functionalTitle" class="section-title" style="display:none">Functional and Performance Requirements</div>
             <div id="result" class="result-box"></div>
+            <div id="bioTitle" class="section-title" style="display:none">Biological and Safety Requirements</div>
+            <div id="bioResult" class="result-box"></div>
         </div>
     </div>
 
     <script>
         async function fetchData() {
             const deviceName = document.getElementById('deviceName').value.trim();
+            const showFunctional = document.getElementById('functional').checked;
+            const showBiological = document.getElementById('biological').checked;
+
             if (!deviceName) return alert("Please enter a device name.");
-            document.getElementById('result').innerHTML = "<p>Loading...</p>";
+
+            if (showFunctional) {
+                document.getElementById('functionalTitle').style.display = 'block';
+                document.getElementById('result').innerHTML = "<p>Loading Functional & Performance Requirements...</p>";
+            } else {
+                document.getElementById('functionalTitle').style.display = 'none';
+                document.getElementById('result').innerHTML = "";
+            }
+
+            if (showBiological) {
+                document.getElementById('bioTitle').style.display = 'block';
+                document.getElementById('bioResult').innerHTML = "<p>Loading Biological & Safety Requirements...</p>";
+            } else {
+                document.getElementById('bioTitle').style.display = 'none';
+                document.getElementById('bioResult').innerHTML = "";
+            }
 
             try {
-                const response = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ deviceName })
-                });
+                if (showFunctional) {
+                    const functionalRes = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ deviceName })
+                    });
+                    const functionalData = await functionalRes.json();
+                    document.getElementById('result').innerHTML = formatResponse(functionalData.result || "No data returned.");
+                }
 
-                const data = await response.json();
-                document.getElementById('result').innerHTML = formatResponse(data.result || "No data returned.");
+                if (showBiological) {
+                    const prompt = `You are a regulatory affairs assistant generating structured design input documentation for medical devices in accordance with ISO 13485, ISO 10993, EU MDR, and US FDA guidelines.\n\nFor the generic device: \"${deviceName}\"\n\nProvide only the \"Biological and Safety Requirements\" section using this format:\n\n1. Raw Material Compatibility:\n- [Describe if raw materials are biologically acceptable, inert, and safe]\n- [Mention container interaction, if relevant]\n\n2. Biological Safety:\n- No tissue toxicity\n- No skin irritation or microbial response\n- No intracutaneous reactivity\n- Resistance to infection\n\n3. Biocompatibility Tests Required:\n- Cytotoxicity\n- Sensitization\n- Intracutaneous Reactivity\n- Systemic Toxicity\n- [Add based on device nature, e.g., implantation, degradation]\n\n4. Applicable Standards:\n- ISO 10993-1, -5, -10, etc.\n- USP <88>, EP (if applicable)\n\nDo not generate unrelated text. Keep structure exact.`;
+
+                    const bioRes = await fetch("https://api.openai.com/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer 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`
+                        },
+                        body: JSON.stringify({
+                            model: "gpt-4",
+                            messages: [{ role: "user", content: prompt }]
+                        })
+                    });
+
+                    const bioData = await bioRes.json();
+                    const bioText = bioData.choices?.[0]?.message?.content || "No response.";
+                    document.getElementById('bioResult').innerHTML = formatResponse(bioText);
+                }
             } catch (error) {
                 console.error(error);
-                document.getElementById('result').textContent = "Error fetching data.";
+                if (showFunctional) document.getElementById('result').textContent = "Error fetching Functional Requirements.";
+                if (showBiological) document.getElementById('bioResult').textContent = "Error fetching Biological Requirements.";
             }
         }
 
