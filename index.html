@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Design Input - Functional and Performance Requirement</title>
 
-    <!-- Inlined CSS -->
     <style>
-        /* Background Styling */
         body {
             background-image: url('https://media.invisioncic.com/r125076/monthly_2018_06/bg.thumb.png.ad66be112e6eee8363d8605b57cff261.png');
             background-size: cover;
@@ -21,54 +19,47 @@
             height: 100vh;
         }
 
-        /* Main Container */
         .container {
             width: 90%;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            gap: 40px; /* Space between the two boxes */
+            align-items: flex-start;
+            gap: 40px;
         }
 
-        /* Box Styling (For Both Left & Right) */
         .box {
             width: 48%;
-            height: 450px;
+            min-height: 450px;
             background-color: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
         }
 
-        /* Left Box Specific Styling */
         .left-box {
             padding: 20px 30px;
         }
 
-        /* Title Styling */
         .title {
-            font-size: 32px; /* Increased size */
+            font-size: 32px;
             font-weight: bold;
             text-align: center;
-            color: #4F7942; /* Fern Green */
+            color: #4F7942;
             margin-bottom: 5px;
         }
 
-        /* Subtitle Styling */
         .subtitle {
-            font-size: 20px; /* Increased size slightly */
+            font-size: 20px;
             font-weight: normal;
             text-align: center;
-            color: #4F7942; /* Fern Green */
+            color: #4F7942;
             margin-bottom: 20px;
         }
 
-        /* Input Field */
-        input {
+        input[type="text"] {
             padding: 12px;
             width: 90%;
             font-size: 16px;
@@ -80,7 +71,18 @@
             margin-bottom: 15px;
         }
 
-        /* "Go" Button - Fern Green Color */
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
         button {
             background-color: #4F7942;
             color: white;
@@ -91,71 +93,135 @@
             border-radius: 5px;
             width: 90%;
             transition: background 0.3s ease;
+            margin-top: 10px;
         }
 
         button:hover {
             background-color: #3F6635;
         }
 
-        /* Response Box */
         .result-box {
             width: 100%;
-            height: 100%;
+            min-height: 100%;
             background-color: white;
             color: black;
-            font-size: 14px; /* Decreased text size */
+            font-size: 14px;
             border-radius: 5px;
             overflow-y: auto;
             text-align: left;
             padding: 15px;
-            box-shadow: none; /* Removes inner border */
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4F7942;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Left Box (Input Section) -->
         <div class="box left-box">
             <div class="title">Design Input</div>
-            <div class="subtitle">Functional and Performance Requirements</div>
+            <div class="subtitle">Select Sections</div>
             <input type="text" id="deviceName" placeholder="Enter Generic Device Name">
+            <label><input type="checkbox" id="functional" checked> Functional & Performance Requirements</label>
+            <label><input type="checkbox" id="biological" checked> Biological & Safety Requirements</label>
             <button onclick="fetchData()">Go</button>
+            <button onclick="downloadPDF()">Download as PDF</button>
         </div>
 
-        <!-- Right Box (Response Only) -->
         <div class="box">
             <div id="result" class="result-box"></div>
+            <div id="bioResult" class="result-box"></div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
+        const apiKey = "your-openai-api-key";
+
         async function fetchData() {
             const deviceName = document.getElementById('deviceName').value.trim();
+            const includeFunctional = document.getElementById('functional').checked;
+            const includeBiological = document.getElementById('biological').checked;
+
             if (!deviceName) return alert("Please enter a device name.");
-            document.getElementById('result').innerHTML = "<p>Loading...</p>";
+
+            if (includeFunctional) {
+                document.getElementById('result').innerHTML = "<div class='section-title'>Functional and Performance Requirements</div><p>Loading...</p>";
+            } else {
+                document.getElementById('result').innerHTML = "";
+            }
+
+            if (includeBiological) {
+                document.getElementById('bioResult').innerHTML = "<div class='section-title'>Biological and Safety Requirements</div><p>Loading...</p>";
+            } else {
+                document.getElementById('bioResult').innerHTML = "";
+            }
 
             try {
-                const response = await fetch("https://1dacb17c-7b43-470b-a0b2-7b64e65a3211-00-1oi52096rimcn.pike.replit.dev/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ deviceName })
-                });
+                if (includeFunctional) {
+                    const prompt1 = `You are a regulatory affairs assistant generating structured design input documentation for medical devices.\n\nFor the generic device: \"${deviceName}\"\n\nProvide only the \"Functional and Performance Requirements\" section of the design input.\nUse the following format:\n\n1. Material of Construction:\n- [Material types, applicable standards like ASTM F75-07, F648-07, etc.]\n\n2. Component Design and Dimension:\n- [Dimensional specs, tolerances, and associated standards like ASTM F2083, ISO]\n\n3. Wear Characteristics:\n- [Expected wear behavior, wear test requirement (e.g. ISO 14243)]\n\n4. Fatigue Properties:\n- [Expected loading and fatigue cycles, methods of evaluation, applicable testing standards]\n\nDo not generate any other content.`;
+                    const res1 = await fetchGPT(prompt1);
+                    document.getElementById('result').innerHTML = `<div class='section-title'>Functional and Performance Requirements</div>${formatResponse(res1)}`;
+                }
 
-                const data = await response.json();
-                document.getElementById('result').innerHTML = formatResponse(data.result || "No data returned.");
+                if (includeBiological) {
+                    const prompt2 = `You are a regulatory affairs assistant generating structured design input documentation for medical devices in accordance with ISO 13485, ISO 10993, EU MDR, and US FDA guidelines.\n\nFor the generic device: \"${deviceName}\"\n\nProvide only the \"Biological and Safety Requirements\" section using this format:\n\n1. Raw Material Compatibility:\n- [Describe if raw materials are biologically acceptable, inert, and safe]\n- [Mention container interaction, if relevant]\n\n2. Biological Safety:\n- No tissue toxicity\n- No skin irritation or microbial response\n- No intracutaneous reactivity\n- Resistance to infection\n\n3. Biocompatibility Tests Required:\n- Cytotoxicity\n- Sensitization\n- Intracutaneous Reactivity\n- Systemic Toxicity\n- [Add based on device nature, e.g., implantation, degradation]\n\n4. Applicable Standards:\n- ISO 10993-1, -5, -10, etc.\n- USP <88>, EP (if applicable)\n\nDo not generate unrelated text. Keep structure exact.`;
+                    const res2 = await fetchGPT(prompt2);
+                    document.getElementById('bioResult').innerHTML = `<div class='section-title'>Biological and Safety Requirements</div>${formatResponse(res2)}`;
+                }
             } catch (error) {
                 console.error(error);
-                document.getElementById('result').textContent = "Error fetching data.";
+                if (includeFunctional) document.getElementById('result').textContent = "Error fetching Functional and Performance Requirements.";
+                if (includeBiological) document.getElementById('bioResult').textContent = "Error fetching Biological and Safety Requirements.";
             }
         }
 
-        // Function to Format Response
+        async function fetchGPT(prompt) {
+            const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "gpt-4",
+                    messages: [{ "role": "user", "content": prompt }]
+                })
+            });
+
+            const data = await response.json();
+            return data.choices?.[0]?.message?.content || "No response.";
+        }
+
         function formatResponse(text) {
-            text = text.replace(/^Design Input.*\n/, ""); // Remove unnecessary title
-            text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"); // Convert **bold** to <strong>
-            text = text.replace(/- (.*?)\n/g, "$1<br>"); // Remove bullet points while keeping list items
-            text = text.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>"); // Convert newlines to <br>
+            text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+            text = text.replace(/- (.*?)\n/g, "$1<br>");
+            text = text.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>");
             return text;
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let content = "";
+            const functional = document.getElementById('result').innerText;
+            const biological = document.getElementById('bioResult').innerText;
+
+            if (functional) {
+                content += "Functional and Performance Requirements\n\n" + functional + "\n\n";
+            }
+            if (biological) {
+                content += "Biological and Safety Requirements\n\n" + biological;
+            }
+
+            const lines = doc.splitTextToSize(content, 180);
+            doc.text(lines, 10, 10);
+            doc.save('Design_Input_Report.pdf');
         }
     </script>
 </body>
