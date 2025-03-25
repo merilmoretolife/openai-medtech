@@ -52,7 +52,7 @@
     .checkboxes {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 4px;
       margin-top: 10px;
     }
     button {
@@ -129,46 +129,62 @@
     }
 
     function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const pageHeight = doc.internal.pageSize.height;
-      const margin = 10;
-      let y = 20;
-      let pageNumber = 1;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const pageHeight = doc.internal.pageSize.height;
+  const margin = 10;
+  let y = 25;
+  let pageNumber = 1;
 
-      const logo = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDABALDA4MChAODQ4SERATGBYUGBgaGBgaIB4iIiAdICQiIyIjJiQlKCQnKS8yLTIwNDY3ODlDOEZGQUZbXVtd/2wBDARESEhgZICgaICgaWEMdXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl7/wAARCAAVABQDASIAAhEBAxEB/8QAGwABAQEBAQEBAQAAAAAAAAAAAAYCBQcDAQL/xAA6EAABAwIEBAUDBwMDBQEAAAABAAIRAwQSITFBURTiYXGBkaHB0RQjQlKhsdHhYqLxM0NTgvDxQ2ODFf/EABgBAQEBAQEAAAAAAAAAAAAAAAABAgME/8QAHREAAgMBAAMBAQAAAAAAAAAAAAECAxESITFRcf/aAAwDAQACEAMQAAAB84ig8V1fLMZy6RGDoWTqZ9OqIHDVUZ9eZNRJ9md6oxJVRShShS9N6ek+u+eQXQuROXY6VXco8t5RxPdz6jv2sa9t0e2zXL6Z9vmM7+0kmvSLPZ4RXMZ81zhyZSYZXPk3o+muOh3FdOvD8eeHG+c8NmKx0WSU1q1bmKkKRSeF5c9PRSpNfnGu/ru++pU3OzS7mup06le1HyzjUef8AZbc3iZl+KwQAAAAD/2Q==";
+  const logo = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDABALDA4MChAODQ4SERATGBYUGBgaGBgaIB4iIiAdICQiIyIjJiQlKCQnKS8yLTIwNDY3ODlDOEZGQUZbXVtd/2wBDARESEhgZICgaICgaWEMdXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl7/wAARCAAVABQDASIAAhEBAxEB/8QAGwABAQEBAQEBAQAAAAAAAAAAAAYCBQcDAQL/xAA6EAABAwIEBAUDBwMDBQEAAAABAAIRAwQSITFBURTiYXGBkaHB0RQjQlKhsdHhYqLxM0NTgvDxQ2ODFf/EABgBAQEBAQEAAAAAAAAAAAAAAAABAgME/8QAHREAAgMBAAMBAQAAAAAAAAAAAAECAxESITFRcf/aAAwDAQACEAMQAAAB84ig8V1fLMZy6RGDoWTqZ9OqIHDVUZ9eZNRJ9md6oxJVRShShS9N6ek+u+eQXQuROXY6VXco8t5RxPdz6jv2sa9t0e2zXL6Z9vmM7+0kmvSLPZ4RXMZ81zhyZSYZXPk3o+muOh3FdOvD8eeHG+c8NmKx0WSU1q1bmKkKRSeF5c9PRSpNfnGu/ru++pU3OzS7mup06le1HyzjUef8AZbc3iZl+KwQAAAAD/2Q==";
 
-      function addHeaderFooter(pageNumber) {
-        doc.addImage(logo, 'JPEG', margin, 5, 25, 10);
-        doc.setFontSize(12);
-        doc.setFont(undefined, "bold");
-        doc.text("Design Input", 170, 12, { align: "right" });
-        doc.setFontSize(10);
-        doc.setFont(undefined, "normal");
-        doc.text(`Page ${pageNumber}`, margin, pageHeight - 10);
+  function addHeaderFooter(pageNumber) {
+    doc.addImage(logo, 'JPEG', margin, 5, 25, 10);
+    doc.setFontSize(12);
+    doc.setFont(undefined, "bold");
+    doc.text("Design Input", 105, 12, { align: "center" });
+    doc.setFontSize(10);
+    doc.setFont(undefined, "normal");
+    doc.text(`Page ${pageNumber}`, margin, pageHeight - 10);
+  }
+
+  addHeaderFooter(pageNumber);
+
+  const elements = document.querySelectorAll("#results h3, #results .results");
+  elements.forEach((el, index) => {
+    const text = el.innerText.replace(/[\*#]+/g, "").trim();
+    const lines = doc.splitTextToSize(text, 180);
+    const isTitle = el.tagName === 'H3';
+
+    if (!isTitle) {
+      if (y + lines.length * 7 > pageHeight - 20) {
+        doc.addPage();
+        pageNumber++;
+        y = 25;
+        addHeaderFooter(pageNumber);
       }
+      doc.setFontSize(14);
+      doc.setFont(undefined, "bold");
+      const title = elements[index - 1]?.innerText?.trim() || "";
+      doc.text(title, margin, y);
+      y += 10;
 
-      addHeaderFooter(pageNumber);
-
-      const elements = document.querySelectorAll("#results h3, #results .results");
-      elements.forEach(el => {
-        const text = el.innerText.replace(/[\*#]+/g, "").trim();
-        const lines = doc.splitTextToSize(text, 180);
-
-        if (y + lines.length * 7 > pageHeight - 20) {
+      doc.setFontSize(11);
+      doc.setFont(undefined, "normal");
+      lines.forEach(line => {
+        if (y + 7 > pageHeight - 20) {
           doc.addPage();
           pageNumber++;
-          y = 20;
+          y = 25;
           addHeaderFooter(pageNumber);
         }
-
-        doc.setFontSize(el.tagName === 'H3' ? 14 : 11);
-        doc.setFont(undefined, el.tagName === 'H3' ? "bold" : "normal");
-        doc.text(lines, margin, y);
-        y += lines.length * 7 + 5;
+        doc.text(line, margin, y, { align: "justify", maxWidth: 180 });
+        y += 7;
       });
+    }
+  });
 
-      doc.save("Design_Inputs.pdf");
+  doc.save("Design_Inputs.pdf");
     }
   </script>
 </body>
