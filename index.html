@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Design Input</title>
+  <title>Design Input Generator</title>
   <style>
     body {
       background-color: #000;
@@ -52,7 +52,7 @@
     .checkboxes {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
       margin-top: 10px;
     }
     button {
@@ -72,7 +72,7 @@
 </head>
 <body>
   <div class="container">
-    <div class="title">Design Input</div>
+    <div class="title">Design Input Generator</div>
     <label for="deviceName">Generic Device:</label>
     <input type="text" id="deviceName" placeholder="Enter device name">
 
@@ -133,34 +133,41 @@
   const doc = new jsPDF();
   const pageHeight = doc.internal.pageSize.height;
   const margin = 10;
-  let y = 25;
+  let y = 30;
   let pageNumber = 1;
 
   const logo = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDABALDA4MChAODQ4SERATGBYUGBgaGBgaIB4iIiAdICQiIyIjJiQlKCQnKS8yLTIwNDY3ODlDOEZGQUZbXVtd/2wBDARESEhgZICgaICgaWEMdXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl7/wAARCAAVABQDASIAAhEBAxEB/8QAGwABAQEBAQEBAQAAAAAAAAAAAAYCBQcDAQL/xAA6EAABAwIEBAUDBwMDBQEAAAABAAIRAwQSITFBURTiYXGBkaHB0RQjQlKhsdHhYqLxM0NTgvDxQ2ODFf/EABgBAQEBAQEAAAAAAAAAAAAAAAABAgME/8QAHREAAgMBAAMBAQAAAAAAAAAAAAECAxESITFRcf/aAAwDAQACEAMQAAAB84ig8V1fLMZy6RGDoWTqZ9OqIHDVUZ9eZNRJ9md6oxJVRShShS9N6ek+u+eQXQuROXY6VXco8t5RxPdz6jv2sa9t0e2zXL6Z9vmM7+0kmvSLPZ4RXMZ81zhyZSYZXPk3o+muOh3FdOvD8eeHG+c8NmKx0WSU1q1bmKkKRSeF5c9PRSpNfnGu/ru++pU3OzS7mup06le1HyzjUef8AZbc3iZl+KwQAAAAD/2Q==";
 
   function addHeaderFooter(pageNumber) {
+    doc.setDrawColor(150);
+    doc.setLineWidth(0.5);
+    doc.line(10, 18, 200, 18); // top line
     doc.addImage(logo, 'JPEG', margin, 5, 25, 10);
     doc.setFontSize(12);
     doc.setFont(undefined, "bold");
     doc.text("Design Input", 105, 12, { align: "center" });
+    doc.setDrawColor(150);
+    doc.line(10, pageHeight - 15, 200, pageHeight - 15); // bottom line
     doc.setFontSize(10);
     doc.setFont(undefined, "normal");
-    doc.text(`Page ${pageNumber}`, margin, pageHeight - 10);
+    doc.text(`Page ${pageNumber}`, 105, pageHeight - 10, { align: "center" });
   }
+
+  const elements = document.querySelectorAll("#results h3, #results .results");
+  if (elements.length === 0) return alert("No content to export.");
 
   addHeaderFooter(pageNumber);
 
-  const elements = document.querySelectorAll("#results h3, #results .results");
   elements.forEach((el, index) => {
     const text = el.innerText.replace(/[\*#]+/g, "").trim();
     const lines = doc.splitTextToSize(text, 180);
     const isTitle = el.tagName === 'H3';
 
     if (!isTitle) {
-      if (y + lines.length * 7 > pageHeight - 20) {
+      if (y + lines.length * 7 + 15 > pageHeight - 20) {
         doc.addPage();
         pageNumber++;
-        y = 25;
+        y = 30;
         addHeaderFooter(pageNumber);
       }
       doc.setFontSize(14);
@@ -175,16 +182,17 @@
         if (y + 7 > pageHeight - 20) {
           doc.addPage();
           pageNumber++;
-          y = 25;
+          y = 30;
           addHeaderFooter(pageNumber);
         }
-        doc.text(line, margin, y, { align: "justify", maxWidth: 180 });
+        doc.text(line, margin, y, { maxWidth: 180 });
         y += 7;
       });
     }
   });
 
   doc.save("Design_Inputs.pdf");
+}
     }
   </script>
 </body>
