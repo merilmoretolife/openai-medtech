@@ -1,211 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Design Input - Functional and Performance Requirement</title>
-
-    <style>
-        body {
-            background-image: url('https://media.invisioncic.com/r125076/monthly_2018_06/bg.thumb.png.ad66be112e6eee8363d8605b57cff261.png');
-            background-size: cover;
-            background-position: center;
-            font-family: 'Helvetica', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .container {
-            width: 90%;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 40px;
-        }
-
-        .box {
-            width: 48%;
-            min-height: 450px;
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .left-box {
-            padding: 20px 30px;
-        }
-
-        .title {
-            font-size: 32px;
-            font-weight: bold;
-            text-align: center;
-            color: #4F7942;
-            margin-bottom: 5px;
-        }
-
-        .subtitle {
-            font-size: 20px;
-            font-weight: normal;
-            text-align: center;
-            color: #4F7942;
-            margin-bottom: 20px;
-        }
-
-        input[type="text"] {
-            padding: 12px;
-            width: 90%;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid black;
-            background-color: white;
-            color: black;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        input[type="checkbox"] {
-            margin-right: 10px;
-        }
-
-        label {
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        button {
-            background-color: #4F7942;
-            color: white;
-            font-size: 18px;
-            padding: 12px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            width: 90%;
-            transition: background 0.3s ease;
-            margin-top: 10px;
-        }
-
-        button:hover {
-            background-color: #3F6635;
-        }
-
-        .result-box {
-            width: 100%;
-            min-height: 100%;
-            background-color: white;
-            color: black;
-            font-size: 14px;
-            border-radius: 5px;
-            overflow-y: auto;
-            text-align: left;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #4F7942;
-            margin-bottom: 10px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design Input</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      background-image: url('https://media.invisioncic.com/r125076/monthly_2018_06/bg.thumb.png.ad66be112e6eee8363d8605b57cff261.png');
+      background-size: cover;
+      background-position: center;
+      font-family: 'Helvetica', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      width: 90%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+    }
+    .box {
+      width: 48%;
+      min-height: 450px;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .left-box {
+      padding: 20px 30px;
+    }
+    .title {
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      color: #4F7942;
+      margin-bottom: 5px;
+    }
+    .subtitle {
+      font-size: 20px;
+      font-weight: normal;
+      text-align: center;
+      color: #4F7942;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      padding: 12px;
+      width: 90%;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid black;
+      background-color: white;
+      color: black;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    input[type="checkbox"] {
+      margin-right: 10px;
+    }
+    label {
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    button {
+      background-color: #4F7942;
+      color: white;
+      font-size: 18px;
+      padding: 12px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      width: 90%;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #3F6635;
+    }
+    .result-box {
+      width: 100%;
+      min-height: 100%;
+      background-color: white;
+      color: black;
+      font-size: 14px;
+      border-radius: 5px;
+      overflow-y: auto;
+      text-align: left;
+      padding: 15px;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #4F7942;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="box left-box">
-            <div class="title">Design Input</div>
-            <div class="subtitle">Select Sections</div>
-            <input type="text" id="deviceName" placeholder="Enter Generic Device Name">
-            <label><input type="checkbox" id="functional" checked> Functional & Performance Requirements</label>
-            <label><input type="checkbox" id="biological" checked> Biological & Safety Requirements</label>
-            <button onclick="fetchData()">Go</button>
-        </div>
-
-        <div class="box">
-            <div id="functionalTitle" class="section-title" style="display:none">Functional and Performance Requirements</div>
-            <div id="result" class="result-box"></div>
-            <div id="bioTitle" class="section-title" style="display:none">Biological and Safety Requirements</div>
-            <div id="bioResult" class="result-box"></div>
-        </div>
+  <div class="container">
+    <div class="box left-box">
+      <div class="title">Design Input</div>
+      <div class="subtitle">Select Sections</div>
+      <input type="text" id="deviceName" placeholder="Enter Generic Device Name" />
+      <label><input type="checkbox" id="functional" checked /> Functional & Performance Requirements</label>
+      <label><input type="checkbox" id="biological" checked /> Biological & Safety Requirements</label>
+      <button onclick="fetchData()">Go</button>
+      <button onclick="downloadPDF()">Download as PDF</button>
     </div>
+    <div class="box">
+      <div id="functionalTitle" class="section-title" style="display: none">Functional and Performance Requirements</div>
+      <div id="result" class="result-box"></div>
+      <div id="bioTitle" class="section-title" style="display: none">Biological and Safety Requirements</div>
+      <div id="bioResult" class="result-box"></div>
+    </div>
+  </div>
 
-    <script>
-        async function fetchData() {
-            const deviceName = document.getElementById('deviceName').value.trim();
-            const showFunctional = document.getElementById('functional').checked;
-            const showBiological = document.getElementById('biological').checked;
+  <script>
+    async function fetchData() {
+      const deviceName = document.getElementById("deviceName").value.trim();
+      const showFunctional = document.getElementById("functional").checked;
+      const showBiological = document.getElementById("biological").checked;
 
-            if (!deviceName) return alert("Please enter a device name.");
+      if (!deviceName) return alert("Please enter a device name.");
 
-            if (showFunctional) {
-                document.getElementById('functionalTitle').style.display = 'block';
-                document.getElementById('result').innerHTML = "<p>Loading Functional & Performance Requirements...</p>";
-            } else {
-                document.getElementById('functionalTitle').style.display = 'none';
-                document.getElementById('result').innerHTML = "";
-            }
+      if (showFunctional) {
+        document.getElementById("functionalTitle").style.display = "block";
+        document.getElementById("result").innerHTML = "<p>Loading Functional & Performance Requirements...</p>";
+      } else {
+        document.getElementById("functionalTitle").style.display = "none";
+        document.getElementById("result").innerHTML = "";
+      }
 
-            if (showBiological) {
-                document.getElementById('bioTitle').style.display = 'block';
-                document.getElementById('bioResult').innerHTML = "<p>Loading Biological & Safety Requirements...</p>";
-            } else {
-                document.getElementById('bioTitle').style.display = 'none';
-                document.getElementById('bioResult').innerHTML = "";
-            }
+      if (showBiological) {
+        document.getElementById("bioTitle").style.display = "block";
+        document.getElementById("bioResult").innerHTML = "<p>Loading Biological & Safety Requirements...</p>";
+      } else {
+        document.getElementById("bioTitle").style.display = "none";
+        document.getElementById("bioResult").innerHTML = "";
+      }
 
-            try {
-                if (showFunctional) {
-                    const functionalRes = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ deviceName })
-                    });
-                    const functionalData = await functionalRes.json();
-                    document.getElementById('result').innerHTML = formatResponse(functionalData.result || "No data returned.");
-                }
+      try {
+        if (showFunctional) {
+          const functionalRes = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deviceName })
+          });
 
-                if (showBiological) {
-                    const prompt = `You are a regulatory affairs assistant generating structured design input documentation for medical devices in accordance with ISO 13485, ISO 10993, EU MDR, and US FDA guidelines.\n\nFor the generic device: \"${deviceName}\"\n\nProvide only the \"Biological and Safety Requirements\" section using this format:\n\n1. Raw Material Compatibility:\n- [Describe if raw materials are biologically acceptable, inert, and safe]\n- [Mention container interaction, if relevant]\n\n2. Biological Safety:\n- No tissue toxicity\n- No skin irritation or microbial response\n- No intracutaneous reactivity\n- Resistance to infection\n\n3. Biocompatibility Tests Required:\n- Cytotoxicity\n- Sensitization\n- Intracutaneous Reactivity\n- Systemic Toxicity\n- [Add based on device nature, e.g., implantation, degradation]\n\n4. Applicable Standards:\n- ISO 10993-1, -5, -10, etc.\n- USP <88>, EP (if applicable)\n\nDo not generate unrelated text. Keep structure exact.`;
-
-                    const bioRes = await fetch("https://api.openai.com/v1/chat/completions", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer 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`
-                        },
-                        body: JSON.stringify({
-                            model: "gpt-4",
-                            messages: [{ role: "user", content: prompt }]
-                        })
-                    });
-
-                    const bioData = await bioRes.json();
-                    const bioText = bioData.choices?.[0]?.message?.content || "No response.";
-                    document.getElementById('bioResult').innerHTML = formatResponse(bioText);
-                }
-            } catch (error) {
-                console.error(error);
-                if (showFunctional) document.getElementById('result').textContent = "Error fetching Functional Requirements.";
-                if (showBiological) document.getElementById('bioResult').textContent = "Error fetching Biological Requirements.";
-            }
+          if (!functionalRes.ok) throw new Error(await functionalRes.text());
+          const functionalData = await functionalRes.json();
+          document.getElementById("result").innerHTML = formatResponse(functionalData.result || "No data returned.");
         }
 
-        function formatResponse(text) {
-            text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-            text = text.replace(/- (.*?)\n/g, "$1<br>");
-            text = text.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>");
-            return text;
+        if (showBiological) {
+          const bioRes = await fetch("https://medtech-api-jjqj.onrender.com/biological", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deviceName })
+          });
+
+          if (!bioRes.ok) throw new Error(await bioRes.text());
+          const bioData = await bioRes.json();
+          document.getElementById("bioResult").innerHTML = formatResponse(bioData.result || "No data returned.");
         }
-    </script>
+      } catch (error) {
+        console.error("Fetch error:", error);
+        if (showFunctional) document.getElementById("result").textContent = "Error fetching data: " + error.message;
+        if (showBiological) document.getElementById("bioResult").textContent = "Error fetching data: " + error.message;
+      }
+    }
+
+    function formatResponse(text) {
+      text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+      text = text.replace(/- (.*?)\n/g, "$1<br>");
+      text = text.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>");
+      return text;
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let content = "";
+
+      const functionalTitle = document.getElementById("functionalTitle").style.display !== "none" ? "Functional and Performance Requirements\n\n" : "";
+      const bioTitle = document.getElementById("bioTitle").style.display !== "none" ? "Biological and Safety Requirements\n\n" : "";
+
+      const functionalText = document.getElementById("result").innerText;
+      const bioText = document.getElementById("bioResult").innerText;
+
+      if (functionalTitle) content += functionalTitle + functionalText + "\n\n";
+      if (bioTitle) content += bioTitle + bioText;
+
+      const lines = doc.splitTextToSize(content, 180);
+      doc.text(lines, 10, 10);
+      doc.save("Design_Input_Report.pdf");
+    }
+  </script>
 </body>
 </html>
