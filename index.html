@@ -110,13 +110,13 @@
     </div>
 
     <button onclick="generateInputs()">Go</button>
-<button onclick="downloadPDF()">Download as PDF</button>
+    <button id="downloadBtn" onclick="downloadPDF()">Download as PDF</button>
 
     <div id="spinner"></div>
     <div class="section" id="results"></div>
   </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     document.getElementById("selectAll").addEventListener("change", function () {
       const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]");
@@ -163,42 +163,30 @@
       resultsDiv.innerHTML = output;
     }
 function downloadPDF() {
-  console.log("Download triggered ✅");
-
-  const jsPDFGlobal = window.jspdf;
-  if (!jsPDFGlobal || !jsPDFGlobal.jsPDF) {
-    alert("jsPDF is not loaded correctly.");
-    return;
-  }
-
-  const doc = new jsPDFGlobal.jsPDF({ orientation: "landscape" });
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape" });
   const pageHeight = doc.internal.pageSize.height;
   const pageWidth = doc.internal.pageSize.width;
   const margin = 15;
-  const contentWidth = pageWidth - margin * 2 - 10;
+  const contentWidth = pageWidth - margin * 2 - 10; // tighter wrap
   let y = 45;
   let pageNumber = 1;
 
-  const logo = "data:image/jpeg;base64,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"; // ⬅️ Insert your full base64 Meril logo here
+  const logo = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBLAEsAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAB6AMgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDoKKKK/Yz8qCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooARu1FDdqKCWLRRRQUFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAjdqKG7UUEsWiiigoKKKKACu9+FHwfv/iy2pLZajb2BsBGX+0Izb9+7GMemw1wVfSX7Gf/AB8eLfZbX/2rXnZhWnh8NOrT3VvzR3YGlCviI06mzv8AkeN/FD4Z6h8Ldct9NvriK7FxAJ4riBSFbkhlwfQj/wAeFcjX1T8drKL4nfCG38T2kY+16TPI0iryQiyGOZfwKhvwr5W6cdaWAxEsRRvU+JOz9UPHYeOHrWh8Ls16BQe/OB39qK6P4b+E28ceOdH0UBjHcTDziO0S/NIf++QfzFd85qnFzlsjijFzkoR3eh6P4V/ZX1/xP4d0/Vjq1np4vYVnFtcROXjVhlckd8EV4vPGYJ5IiclGK8e3FfodpevW914i1HRLZVVdLhgLheimTcQuO2FUfmK/PXUPl1C5x/z2kH/jxrwsrxlfFTqe22Vmvnf9D2cywtHDQp+y63v8rENFFFfQHiBTWYKwG4ZboCOtONegfDXTNPvLG5mnijmujKcrMAxUbRxj65/OvluJs/pcNZbPMatNzUWlZebsrvovM9nKMrnnGLjhKclFu7u/I893ZxjkEdiCD+IoLFfvYUc4YkVu+OrWysvEMyWIVEZVaSNAdofuB+lexfsn+F/D2uXmu3Oo21tfanb+ULeC5VXCxkHc4U98455xxXVhc3p4vLKeaQg1GcYySe/vW3+8xqZfOnjpYFyXNFtX6aHz+X+XIZdv97rQJA2cEHHXBB/lXs37Ufh/QfDvjSwXRooLSe4tWa9t7cBUQ7sI+0dCeePRR61rftU+GdJ8PQ+Dzpem2unmaG4Mn2aIJvx5OM469T+ddtPHRqeytF/vL/KxlUwcqftby+C3zueDUUppK9I4QooooARu1FDdqKCWLRRRQUFFFFABX0j+xl/x8eLfpaf+1a+bq+kf2Mv9f4t/3bT/ANq15Gbf7lU+X5o9PK/98p/P8maH7OfiCHVtQ8ceDb4+ZBJd3N1HGx4aNpGjlUf+On/gVfOvjTw3P4N8U6pos+fMs7logzD7ydUb8VIP410ngvxd/wAIP8ZE1Yvtt01OeK4x/wA8nlZW/IHP4V6V+114P+z6ppPim3TMVyv2S4Zem9cmM/iu7/vkVz039Wx3L9mqvxX/AADep/tGCv8Aapv8H/X4Hz1X0j+yZ4XisbPXPGN7hIY1NrBIw4VFG+Zv5D8DXzfDFJcTRwwoZZpXEcaDqWbAX/PvX1d8V3i+EP7P9n4btnCXt7GtkzL1Ytl7h/y3D/gQrTNJOUIYaG9R2+XUzy6KjKWIltBX+fQk/Zm8RyeMPEPj/WZc7ry9ilUN1C4cKPwUAfhXylqR/wCJhdc8CZ8/99GvpX9jX/j38U+72/8AJq8i+E/gRPiJ8UYtNuNzWEUstzdBeMxo2CuevJIH41jh5Qw+JxMnpGKj+CNq8Z4jD4eK1lJy/FkXgX4KeLPiDCt1p1mlvpzHi9vG8tG/3Rjcx+gx79q7a8/ZH8Ww27Pb6ppF3KB/qVaRD+ZBFHx8+MuoXGuT+FfDtw+l6FprfZZfsf7szOvDDI5CLyoA69815Bp3iDVdHvFu7HU7yzulORLDO4Ofzrop/XsRFVVJQT2Vr/e7/kYTWDoydNxcrbu9vuX+ZL4q8J6z4M1J9P1iwksLlRkeZ911/vK3RvwPHpWj8O/AOv8Aj/Uru38OmP7RbxCV99wYvlLBePWvedL1BP2jPg1qMOoRx/8ACVaLuKXCoM+YFyrj0DqCpA4z+Fc5+x583jDxBkf8uCde373p+dY1MZN4Wr7SK54aNbr19GXTwcPrNLkk+Sez2fp6o828D/BvxR8Qric6dbqlvFIyy311Jsh3jIOGwSx9h0rTvPg74o8M/Eiz8M6ffwPrklsbuOa0neAKmHyCxxz8h/MV1Xxk+MGoeH9Vl8H+EbhtH0fS28iSe2+WWWQDMh39QAx7ck9eKyv2dtSu9Z+NWkT391Nez/ZrlfMuJC7YERwMntyePer9rifYzxErKPK2l120v/kL2WGVWNCN3LmSb6b62PNvFmk6hofiTUNO1aTzdVt5fLnbzTKWfaCPmPJ6171+2F/qfBX/AFxuf5Q15R8cf+SteLB2+3/+00r1f9sL/U+Cv+uNz/KKlKTnXwkn1Un/AOSoIxUKGKiujX/pTPnRutJSt1pK908gKKKKAEbtRQ3aigli0UUUFBRRRQAV9I/sZf6/xb/u2n/tWvm6vpH9jL/X+Lf920/9q15Gbf7lU+X5o9PK/wDfKfz/ACZ8+eJFB8R6v73lwPzlavq7w+B8bv2czZM3m6nDAbcHv9oh5Q/8CAX/AL7NfKXiT/kY9W/6/Z//AEa1e2/si+L/ALD4m1Lw9M+I7+L7TAP+msf3h+KN/wCO1lmVNyw0a0PihZr9TXLqijiJUp/DO6OX/Zr8FnxN8TraeeM/ZdIDXcqt08wHbGh9wxz/AMANaX7Vfi7+3PiDFpMUm630eEIwU8GZ/mf8gEH519GaP4V0j4U2vi7XkISG6nk1KbjHlqqZ2D/gW8/8CxXwvrWqz6/q17qd0xa6vJnnfP8AeY7iPw6VzYOosfjJYn7MUkvV7/qb4un9Rwiw3WTu/Rf0j6R/Yz/49fFJ/wCmsA/R6z/2S7ZG8ZeLrg8ssSIB3GZnJ/MgflWh+xn/AMenin/rrB/J65f9l3xBFpfxU1awlYJ/aUUkceT1eOQsAPqpY/hXNiYuUsal2j+R04eSjHCN95BqHwz+Fd5e3M83xQAmkmdn/wBVncxJPaof+FXfCb/oqif+Qv8ACvOPih4XufBfjzWNKmVlCXDSRMejwuSUYevv9CK5rcexb/vo17NPD1JwUo15Wf8Ah/yPIqV4RnKMqKun5/5n1L8KLj4a/Ci+1G4tfiJbagt9GkbR3DIoGwkgjA9CR/8Aqrnv2TxF/wALE8WG3YNB9n/dspyCpm61wXwv+Dr/ABA0DWtbu9Tk0fTdOB/emHzBIQpdsHcOAMZx6+1dp+x3g+Mtex906emPf971ry8TSpwo4lqblKyvf8Nkj0sNUnOth04KMbu1vx6s8U8WTNc+KdZlclne9nYsepPmHmvQv2Y/+SxaP/173P8A6KrzzxL/AMjJqv8A1+Tf+jDXof7Mf/JYtI/697n/ANFGvZxf+5z/AML/ACPJwv8AvcP8S/Mwfjh/yVzxZ/1//wDtNK9X/bC/1Pgr/rjc/wAoq8o+OH/JXPFn/X//AO00r1j9sL/U+Cv+uNz/ACirg/5e4P0f/pKO3/l1i/Vf+lM+c260lK3Wkr3zxQooooARu1FDdqKCWLRRRQUFFFFABXtv7MvxG8PeAJ/EJ13UFsFuxbiHMTvu2+Zu+6DjG5fzrxKk21zYnDxxVJ0ZvR9jehWlh6qqw3Rb1q4ju9a1G4iffFLdzSI2P4WcsD+RB/Grng/xFL4Q8VaTrMJO60uVlIz1UYDD8QTWTjp7UYx+v61q4Jx5HsYqTjLnW+59K/Hz46eHvE3gFtG8O6j9tnvZkS4/dPGY4h85zuAySQo/OvmrHf8AGk2jp2+tLXNhMLTwdP2dPbfU6cTiZ4qp7Spv5Hun7M/xK8O/D+315dd1EWDXUkLRZid92FbP3QfWvF4tUuNL15dSsLhoLiG4aeGZONpD7hxVPGOlGPzqoYaEKs6q3na/bTQU8ROdOFN7R2+Z9Gv8R/h78btFs7TxsT4f1+FQqXsZKAk9dj4I2kkna447Gs1fhH8J9MlFzf8AxIS8tV+Y29vNFuI9DsDN+QrwPaPSjbjpx+NckcA6fu0asox7afhdaHS8b7T3qtOMpd9fxtuez/FD42aZdeGU8HeBrL+zvDyjZLNtKNOuc7VGc4J6sTlvSqv7NvjzQvAfibV7rXL9bCC4tEjjYxs+WEgOPlBryIqG680Y/wA5rX6jS9hLDq9pbvq/O5l9cq+3jXdrrZdPuLet3CXeuahPE/mRS3U0itjGVLkg/wAq7L4GeKNN8G/ErTtV1e6WzsIYp0eUozY3REDhQeprg+2O1FdVSkqlN0ns1Y5qdR06iqLdO51HxW1qy8QfETxBqdhN59ld3fmwTbSN67UGcEDHevQP2kPiJoHjyPwwND1D7d9ijnW4HlOmwsI8D5gM52n8q8W2j/P+fahlDdeay+qw5qUrv3NF81bU1+sT5akbL39X99xaKKK7DmCiiigBG7UUN2ooJYtFFFBQUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFACN2oobtRQSxaKKKCgooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAEbtRQ3aigln/9k="; // Full Meril logo here
   const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
+  const elements = document.querySelectorAll("#results h3, #results .results");
+  if (elements.length === 0) return alert("No content to export.");
+
   const deviceCode = deviceName.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, "X");
   const docNumber = `Document Number: DI/${deviceCode}/001 Rev. 00`;
-  const elements = document.querySelectorAll("#results h3, #results .results");
-
-  if (elements.length === 0) {
-    alert("No content to export.");
-    return;
-  }
-
   const tocEntries = [];
 
   function addHeaderFooter(pageNum) {
-    // Watermark - true center diagonal
+    // Watermark – centered and rotated
     doc.saveGraphicsState();
     doc.setTextColor(240, 240, 240);
     doc.setFontSize(50);
     doc.setFont(undefined, "bold");
-    const text = "Reference Copy";
     doc.textWithRotation = function(txt, x, y, angle, align = "center") {
       this.saveGraphicsState();
       this.translate(x, y);
@@ -206,14 +194,14 @@ function downloadPDF() {
       this.text(txt, 0, 0, { align });
       this.restoreGraphicsState();
     };
-    doc.textWithRotation(text, pageWidth / 2, pageHeight / 2, 45);
+    doc.textWithRotation("Reference Copy", pageWidth / 2, pageHeight / 2, 45);
     doc.restoreGraphicsState();
 
     // Header
-    doc.addImage(logo, 'JPEG', margin, 5, 40, 20); // Meril logo
+    doc.addImage(logo, 'JPEG', margin, 5, 40, 20); // Bigger logo
     doc.setDrawColor(150);
     doc.setLineWidth(0.5);
-    doc.line(margin, 30, pageWidth - margin, 30);
+    doc.line(margin, 30, pageWidth - margin, 30); // move line down
 
     doc.setFontSize(16);
     doc.setFont(undefined, "bold");
@@ -232,10 +220,9 @@ function downloadPDF() {
     doc.text(`Page ${pageNum}`, pageWidth - margin, pageHeight - 10, { align: "right" });
   }
 
-  // Title Page
+  // PAGE 1: TITLE
   addHeaderFooter(pageNumber);
   doc.setFontSize(22);
-  doc.setFont(undefined, "bold");
   const fullTitle = `Design Input – ${deviceName}`;
   const titleLines = doc.splitTextToSize(fullTitle, contentWidth);
   const titleY = pageHeight / 2 - (titleLines.length * 10) / 2;
@@ -243,7 +230,7 @@ function downloadPDF() {
     doc.text(line, pageWidth / 2, titleY + i * 12, { align: "center" });
   });
 
-  // TOC Page
+  // PAGE 2: TOC
   doc.addPage();
   pageNumber++;
   addHeaderFooter(pageNumber);
@@ -252,7 +239,7 @@ function downloadPDF() {
   doc.text("Table of Contents", pageWidth / 2, 35, { align: "center" });
   let tocY = 50;
 
-  // Content Pages
+  // PAGE 3+: CONTENT
   pageNumber++;
   doc.addPage();
   addHeaderFooter(pageNumber);
@@ -299,7 +286,7 @@ function downloadPDF() {
     }
   });
 
-  // Populate TOC entries
+  // Fill TOC now
   doc.setPage(2);
   doc.setFontSize(12);
   doc.setFont(undefined, "normal");
@@ -310,10 +297,8 @@ function downloadPDF() {
     tocY += 8;
   });
 
-  // Final Save
   doc.save(`Design_Input_${deviceName.replace(/\s+/g, "_")}.pdf`);
 }
-    
 </script>
 </body>
 </html>
