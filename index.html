@@ -164,11 +164,11 @@
     }
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  const doc = new jsPDF({ orientation: "landscape" });
   const pageHeight = doc.internal.pageSize.height;
   const pageWidth = doc.internal.pageSize.width;
   const margin = 15;
-  const contentWidth = 180;
+  const contentWidth = pageWidth - margin * 2;
   let y = 40;
   let pageNumber = 1;
 
@@ -177,49 +177,71 @@ function downloadPDF() {
   const elements = document.querySelectorAll("#results h3, #results .results");
   if (elements.length === 0) return alert("No content to export.");
 
+  const deviceCode = deviceName.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, "X");
+  const docNumber = `Document Number: DI/${deviceCode}/001 Rev. 00`;
   const tocEntries = [];
 
   function addHeaderFooter(pageNum) {
-    doc.addImage(logo, 'JPEG', margin, 5, 30, 15);
+    // Watermark
+    doc.saveGraphicsState();
+    doc.setFontSize(50);
+    doc.setTextColor(230, 230, 230);
+    doc.text("Reference Copy", pageWidth / 2, pageHeight / 2, {
+      angle: 45,
+      align: "center"
+    });
+    doc.restoreGraphicsState();
+
+    // Header
+    doc.addImage(logo, 'JPEG', margin, 5, 35, 18); // Enlarged Meril logo
     doc.setDrawColor(150);
     doc.setLineWidth(0.5);
-    doc.line(10, 23, 200, 23);
-    doc.setFontSize(12);
+    doc.line(margin, 26, pageWidth - margin, 26);
+
+    doc.setFontSize(16);
     doc.setFont(undefined, "bold");
     doc.text("Design Input", pageWidth / 2, 20, { align: "center" });
 
-    doc.line(10, pageHeight - 15, 200, pageHeight - 15);
     doc.setFontSize(10);
     doc.setFont(undefined, "normal");
-    doc.text(`Page ${pageNum}`, pageWidth / 2, pageHeight - 10, { align: "center" });
+    doc.text(docNumber, pageWidth - margin, 20, { align: "right" });
+
+    // Footer
+    doc.setDrawColor(150);
+    doc.line(margin, pageHeight - 20, pageWidth - margin, pageHeight - 20);
+
+    doc.setFontSize(9);
+    doc.setFont(undefined, "normal");
+    doc.text("Meril Healthcare Pvt. Ltd.", margin, pageHeight - 14);
+    doc.text("This is a Confidential Document.", margin, pageHeight - 8);
+
+    doc.text(`Page ${pageNum}`, pageWidth - margin, pageHeight - 10, { align: "right" });
   }
 
-  // --- Page 1: Title Page ---
+  // --- Page 1: Title ---
   addHeaderFooter(pageNumber);
-  doc.setFontSize(24);
+  doc.setFontSize(22);
   doc.setFont(undefined, "bold");
   const fullTitle = `Design Input – ${deviceName}`;
   const titleLines = doc.splitTextToSize(fullTitle, contentWidth);
-  const titleY = pageHeight / 2 - (titleLines.length * 8) / 2;
+  const titleY = pageHeight / 2 - (titleLines.length * 10) / 2;
   titleLines.forEach((line, i) => {
-    doc.text(line, pageWidth / 2, titleY + i * 10, { align: "center" });
+    doc.text(line, pageWidth / 2, titleY + i * 12, { align: "center" });
   });
 
-  // --- Page 2: TOC Placeholder ---
+  // --- Page 2: TOC ---
   doc.addPage();
   pageNumber++;
   addHeaderFooter(pageNumber);
-  const tocPageNumber = pageNumber;
   doc.setFontSize(16);
   doc.setFont(undefined, "bold");
-  doc.text("Table of Contents", pageWidth / 2, 40, { align: "center" });
+  doc.text("Table of Contents", pageWidth / 2, 35, { align: "center" });
 
-  let tocY = 55;
-  y = 40;
+  let tocY = 50;
 
-  // --- Start real content from page 3 ---
-  doc.addPage();
+  // --- Start Real Content on Page 3 (NO EXTRA PAGE) ---
   pageNumber++;
+  doc.addPage();
   addHeaderFooter(pageNumber);
   y = 40;
 
@@ -232,13 +254,13 @@ function downloadPDF() {
       const sectionTitle = elements[index - 1]?.innerText?.trim() || "";
       const titleLines = doc.splitTextToSize(sectionTitle, contentWidth);
 
-      if (y + titleLines.length * 8 + lines.length * 7 > pageHeight - 20) {
+      if (y + titleLines.length * 10 + lines.length * 8 > pageHeight - 30) {
         doc.addPage();
         addHeaderFooter(++pageNumber);
         y = 40;
       }
 
-      // Record TOC entry only once per section
+      // Record TOC entry
       tocEntries.push({ title: sectionTitle, page: pageNumber });
 
       // Section Title
@@ -246,40 +268,39 @@ function downloadPDF() {
       doc.setFont(undefined, "bold");
       titleLines.forEach(line => {
         doc.text(line, margin, y);
-        y += 8;
+        y += 10;
       });
 
       // Section Content
       doc.setFontSize(11);
       doc.setFont(undefined, "normal");
       lines.forEach(line => {
-        if (y + 7 > pageHeight - 20) {
+        if (y + 8 > pageHeight - 20) {
           doc.addPage();
           addHeaderFooter(++pageNumber);
           y = 40;
         }
         doc.text(line, margin, y);
-        y += 7;
+        y += 8;
       });
 
-      y += 5; // spacing
+      y += 5;
     }
   });
 
-  // --- Write TOC Entries (after rendering) ---
-  doc.setPage(tocPageNumber);
+  // --- Write TOC Entries (now that we know pages) ---
+  doc.setPage(2);
   doc.setFontSize(12);
   doc.setFont(undefined, "normal");
   tocEntries.forEach(entry => {
-    const title = doc.splitTextToSize(entry.title, 140)[0];
-    doc.text(`${title}`, margin, tocY);
+    const entryTitle = doc.splitTextToSize(entry.title, contentWidth - 30)[0];
+    doc.text(entryTitle, margin, tocY);
     doc.text(`${entry.page}`, pageWidth - margin, tocY, { align: "right" });
     tocY += 8;
   });
 
   doc.save(`Design_Input_${deviceName.replace(/\s+/g, "_")}.pdf`);
 }
-
 </script>
 </body>
 </html>
