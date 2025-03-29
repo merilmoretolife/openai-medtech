@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -271,14 +272,13 @@ function downloadPDF() {
       doc.setFontSize(11);
       doc.setFont(undefined, "normal");
       lines.forEach(line => {
-        if (y + lines.length * 8 > pageHeight - 20) {
-  doc.addPage();
-  addHeaderFooter(++pageNumber);
-  y = 40;
-}
-
-doc.text(lines, margin, y);
-y += lines.length * 8;
+        if (y + 8 > pageHeight - 20) {
+          doc.addPage();
+          addHeaderFooter(++pageNumber);
+          y = 40;
+        }
+        doc.text(line, margin, y);
+        y += 8;
       });
 
       y += 5;
