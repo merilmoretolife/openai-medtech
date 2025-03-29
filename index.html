@@ -189,7 +189,7 @@
   if (elements.length === 0) return alert("No content to export.");
 
   // ✅ FIXED LINE
-  const { Document, Packer, Paragraph, HeadingLevel } = window.docx;
+  const { Document, Packer, Paragraph, HeadingLevel } = (window.docx && window.docx.default) || window.docx;
 
   const doc = new Document();
   const children = [
