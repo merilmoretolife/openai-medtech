@@ -182,33 +182,41 @@
       resultsDiv.innerHTML = output;
     }
 
-    async function downloadWord() {
-      const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
-      const elements = document.querySelectorAll("#results h3, #results .results");
-      if (elements.length === 0) return alert("No content to export.");
+   async function downloadWord() {
+  const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
+  const elements = document.querySelectorAll("#results h3, #results .results");
 
-      const { Document, Packer, Paragraph, HeadingLevel } = docx;
-      const doc = new Document();
-      const children = [
-        new Paragraph({ text: `Design Input – ${deviceName}`, heading: HeadingLevel.TITLE }),
-      ];
+  if (elements.length === 0) return alert("No content to export.");
 
-      elements.forEach((el, index) => {
-        const isTitle = el.tagName === 'H3';
-        const text = el.innerText.replace(/[\*#]+/g, "").trim();
-        children.push(new Paragraph({
-          text,
-          heading: isTitle ? HeadingLevel.HEADING_2 : HeadingLevel.BODY
-        }));
-      });
+  const { Document, Packer, Paragraph, HeadingLevel, TextRun } = docx;
+  const doc = new Document();
+  const children = [
+    new Paragraph({
+      text: `Design Input – ${deviceName}`,
+      heading: HeadingLevel.TITLE,
+    }),
+  ];
 
-      doc.addSection({ children });
-      const blob = await Packer.toBlob(doc);
-      const fileName = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
-      saveAs(blob, fileName);
+  elements.forEach((el) => {
+    const isTitle = el.tagName === "H3";
+    const text = el.innerText.replace(/[\*#]+/g, "").trim();
 
-      saveHistory(deviceName, 'Word');
-    }
+    children.push(
+      new Paragraph({
+        text,
+        heading: isTitle ? HeadingLevel.HEADING_2 : HeadingLevel.BODY,
+      })
+    );
+  });
+
+  doc.addSection({ children });
+
+  const blob = await Packer.toBlob(doc);
+  const fileName = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
+  saveAs(blob, fileName);
+
+  saveHistory(deviceName, "Word");
+}
 
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
