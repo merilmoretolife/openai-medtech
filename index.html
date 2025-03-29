@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,15 +134,10 @@
     <div class="section" id="results"></div>
   </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.1.0/docx.umd.min.js"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.1.0/docx.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<script>
-  window.onload = function () {
-    // ✅ Safe destructure after docx is loaded
-    const { Document, Packer, Paragraph, HeadingLevel } = window.docx;
-
+  <script>
     document.getElementById("selectAll").addEventListener("change", function () {
       const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]");
       checkboxes.forEach(cb => {
@@ -150,7 +146,7 @@
     });
 
     async function generateInputs() {
-    const name = document.getElementById("deviceName").value.trim();
+      const name = document.getElementById("deviceName").value.trim();
       const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
       const selected = Array.from(checkboxes).map(cb => cb.value);
       const resultsDiv = document.getElementById("results");
@@ -187,35 +183,38 @@
       resultsDiv.innerHTML = output;
     }
 
-    async function downloadWord() {
-      const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
-      const elements = document.querySelectorAll("#results h3, #results .results");
-      if (elements.length === 0) return alert("No content to export.");
+   async function downloadWord() {
+  const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
+  const elements = document.querySelectorAll("#results h3, #results .results");
+  if (elements.length === 0) return alert("No content to export.");
 
-      const doc = new Document();
-      const children = [
-        new Paragraph({ text: `Design Input – ${deviceName}`, heading: HeadingLevel.TITLE }),
-      ];
+  // ✅ FIXED LINE
+  const { Document, Packer, Paragraph, HeadingLevel } = window.docx;
 
-      elements.forEach((el, index) => {
-        const isTitle = el.tagName === 'H3';
-        const text = el.innerText.replace(/[\*#]+/g, "").trim();
-        children.push(new Paragraph({
-          text,
-          heading: isTitle ? HeadingLevel.HEADING_2 : HeadingLevel.BODY
-        }));
-      });
+  const doc = new Document();
+  const children = [
+    new Paragraph({ text: `Design Input – ${deviceName}`, heading: HeadingLevel.TITLE }),
+  ];
 
-      doc.addSection({ children });
-      const blob = await Packer.toBlob(doc);
-      const fileName = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
-      saveAs(blob, fileName);
+  elements.forEach((el, index) => {
+    const isTitle = el.tagName === 'H3';
+    const text = el.innerText.replace(/[\*#]+/g, "").trim();
+    children.push(new Paragraph({
+      text,
+      heading: isTitle ? HeadingLevel.HEADING_2 : HeadingLevel.BODY
+    }));
+  });
 
-      saveHistory(deviceName, 'Word');
-    }
+  doc.addSection({ children });
+  const blob = await Packer.toBlob(doc);
+  const fileName = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
+  saveAs(blob, fileName);
+
+  saveHistory(deviceName, 'Word');
+}
 
     async function downloadPDF() {
-     const { jsPDF } = window.jspdf;
+      const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: "landscape" });
       const pageHeight = doc.internal.pageSize.height;
       const pageWidth = doc.internal.pageSize.width;
@@ -340,11 +339,6 @@
       history.unshift({ name: deviceName, type, time: new Date().toLocaleString() });
       localStorage.setItem("downloadHistory", JSON.stringify(history));
     }
-
-    // ✅ Attach click handlers after everything has loaded
-    document.getElementById("downloadPdfBtn").onclick = downloadPDF;
-    document.getElementById("downloadWordBtn").onclick = downloadWord;
-  };
-</script>
+  </script>
 </body>
 </html>
