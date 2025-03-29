@@ -143,7 +143,36 @@
         if (cb !== this) cb.checked = this.checked;
       });
     });
+    
+async function downloadWord() {
+  const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
+  const elements = document.querySelectorAll("#results h3, #results .results");
+  if (elements.length === 0) return alert("No content to export.");
 
+  const { Document, Packer, Paragraph, HeadingLevel } = window.docx;
+
+  const doc = new Document();
+  const children = [
+    new Paragraph({ text: `Design Input – ${deviceName}`, heading: HeadingLevel.TITLE }),
+  ];
+
+  elements.forEach((el, index) => {
+    const isTitle = el.tagName === 'H3';
+    const text = el.innerText.replace(/[\*#]+/g, "").trim();
+    children.push(new Paragraph({
+      text,
+      heading: isTitle ? HeadingLevel.HEADING_2 : HeadingLevel.BODY
+    }));
+  });
+
+  doc.addSection({ children });
+  const blob = await Packer.toBlob(doc);
+  const fileName = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
+  saveAs(blob, fileName);
+
+  saveHistory(deviceName, 'Word');
+}
+    
     async function generateInputs() {
       const name = document.getElementById("deviceName").value.trim();
       const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
@@ -181,35 +210,6 @@
       spinner.style.display = "none";
       resultsDiv.innerHTML = output;
     }
-
-  async function downloadWord() {
-  const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
-  const elements = document.querySelectorAll("#results h3, #results .results");
-  if (elements.length === 0) return alert("No content to export.");
-
-  const { Document, Packer, Paragraph, HeadingLevel } = window.docx;
-
-  const doc = new Document();
-  const children = [
-    new Paragraph({ text: `Design Input – ${deviceName}`, heading: HeadingLevel.TITLE }),
-  ];
-
-  elements.forEach((el, index) => {
-    const isTitle = el.tagName === 'H3';
-    const text = el.innerText.replace(/[\*#]+/g, "").trim();
-    children.push(new Paragraph({
-      text,
-      heading: isTitle ? HeadingLevel.HEADING_2 : HeadingLevel.BODY
-    }));
-  });
-
-  doc.addSection({ children });
-  const blob = await Packer.toBlob(doc);
-  const fileName = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
-  saveAs(blob, fileName);
-
-  saveHistory(deviceName, 'Word');
-}
 
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
