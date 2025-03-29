@@ -133,7 +133,7 @@
     <div class="section" id="results"></div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/docx@8.1.0/build/docx.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.1.2/docx.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
@@ -182,13 +182,12 @@
       resultsDiv.innerHTML = output;
     }
 
-   async function downloadWord() {
+  async function downloadWord() {
   const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
   const elements = document.querySelectorAll("#results h3, #results .results");
   if (elements.length === 0) return alert("No content to export.");
 
-  // ✅ FIXED LINE
-  const { Document, Packer, Paragraph, HeadingLevel } = (window.docx && window.docx.default) || window.docx;
+  const { Document, Packer, Paragraph, HeadingLevel } = window.docx;
 
   const doc = new Document();
   const children = [
