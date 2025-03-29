@@ -101,6 +101,43 @@
       margin-top: 20px;
     }
   </style>
+  <style>
+  .doc-container {
+    font-family: Arial, sans-serif;
+    font-size: 12pt;
+    color: #000;
+    padding: 20px;
+  }
+  .doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #888;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  .doc-header img {
+    height: 40px;
+  }
+  .doc-title {
+    text-align: center;
+    font-size: 20pt;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  h3 {
+    margin-top: 20px;
+    color: #007BFF;
+  }
+  .footer {
+    border-top: 1px solid #888;
+    margin-top: 40px;
+    padding-top: 10px;
+    font-size: 10pt;
+    text-align: center;
+    color: #555;
+  }
+</style>
 </head>
 <body>
   <a href="history.html">View Export History</a>
@@ -132,8 +169,8 @@
     <div id="spinner"></div>
     <div class="section" id="results"></div>
   </div>
-
-<script src="https://cdn.jsdelivr.net/npm/docx@8.1.2/build/index.umd.js"></script>
+  
+<script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
@@ -149,24 +186,28 @@ async function downloadWord() {
   const elements = document.querySelectorAll("#results h3, #results .results");
   if (elements.length === 0) return alert("No content to export.");
 
-  const { Document, Packer, Paragraph, HeadingLevel } = window.docx;
+  // 1. Fill template
+  document.getElementById("docDate").innerText = new Date().toLocaleDateString();
+  document.getElementById("wordTitle").innerText = `Design Input – ${deviceName}`;
+  const wordSections = document.getElementById("wordSections");
+  wordSections.innerHTML = "";
 
-  const doc = new Document();
-  const children = [
-    new Paragraph({ text: `Design Input – ${deviceName}`, heading: HeadingLevel.TITLE }),
-  ];
-
-  elements.forEach((el, index) => {
-    const isTitle = el.tagName === 'H3';
-    const text = el.innerText.replace(/[\*#]+/g, "").trim();
-    children.push(new Paragraph({
-      text,
-      heading: isTitle ? HeadingLevel.HEADING_2 : HeadingLevel.BODY
-    }));
+  elements.forEach((el, i) => {
+    const tag = el.tagName === "H3" ? "h3" : "div";
+    const content = el.innerText.replace(/[\*#]+/g, "").trim();
+    const section = document.createElement(tag);
+    section.innerText = content;
+    wordSections.appendChild(section);
   });
 
-  doc.addSection({ children });
-  const blob = await Packer.toBlob(doc);
+  // 2. Generate Word doc
+  const content = document.getElementById("wordTemplate").innerHTML;
+
+  const html = `
+    <html><head><meta charset="utf-8"></head><body>${content}</body></html>
+  `;
+
+  const blob = window.htmlDocx.asBlob(html);
   const fileName = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
   saveAs(blob, fileName);
 
@@ -338,5 +379,24 @@ async function downloadWord() {
       localStorage.setItem("downloadHistory", JSON.stringify(history));
     }
   </script>
+
+  <div id="wordTemplate" style="display: none;">
+  <div class="doc-container">
+    <div class="doc-header">
+      <img src="https://via.placeholder.com/100x40?text=LOGO" alt="Logo" />
+      <div style="text-align:right;">
+        <div id="docNumber">Document Number: DI/GEN/001 Rev. 00</div>
+        <div>Date: <span id="docDate"></span></div>
+      </div>
+    </div>
+
+    <div class="doc-title" id="wordTitle"></div>
+
+    <div id="wordSections"></div>
+
+    <div class="footer">Meril Healthcare Pvt. Ltd. — Confidential Document</div>
+  </div>
+</div>
+
 </body>
 </html>
