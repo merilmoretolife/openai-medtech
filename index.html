@@ -187,22 +187,23 @@
       });
     });
     
-function downloadWord() {
+async function downloadWord() {
   const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
   const elements = document.querySelectorAll("#results h3, #results .results");
   if (elements.length === 0) return alert("No content to export.");
 
-  // Document number format
+  // Document Number (DI/ABC/001)
   const deviceCode = deviceName.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, "X");
   const docNumber = `DI/${deviceCode}/001 Rev. 00`;
 
-  // Fill template
+  // Fill Word export template
   document.getElementById("docDate").innerText = new Date().toLocaleDateString();
-  document.getElementById("docTitle").innerText = `Design Input – ${deviceName}`;
+  document.getElementById("wordTitle").innerText = `Design Input – ${deviceName}`;
   document.getElementById("docNumber").innerText = `Document Number: ${docNumber}`;
   const wordSections = document.getElementById("wordSections");
   wordSections.innerHTML = "";
 
+  // Loop over result sections
   elements.forEach(el => {
     const tag = el.tagName === "H3" ? "h3" : "div";
     const wrapper = document.createElement(tag);
@@ -210,7 +211,7 @@ function downloadWord() {
     wordSections.appendChild(wrapper);
   });
 
-  // Export using html-docx-js
+  // Convert and export using html-docx-js
   const content = document.getElementById("wordTemplate").innerHTML;
   const html = `<html><head><meta charset='utf-8'></head><body>${content}</body></html>`;
   const blob = window.htmlDocx.asBlob(html);
