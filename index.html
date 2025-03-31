@@ -169,7 +169,12 @@
 
     <div class="btn-group">
       <button id="downloadPdfBtn" onclick="downloadPDF()">Download as PDF</button>
-      <button id="downloadWordBtn" onclick="downloadWord()">Download as Word</button>
+<button id="downloadWordBtn" onclick="downloadWord()">
+  Download as Word
+  <span id="wordSpinner" style="display: none; margin-left: 8px;">
+    ⏳
+  </span>
+</button>
     </div>
 
     <div id="spinner"></div>
@@ -190,11 +195,14 @@ async function downloadWord() {
   const deviceName = document.getElementById("deviceName").value.trim();
   const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
   const selected = Array.from(checkboxes).map(cb => cb.value);
+  const spinner = document.getElementById("wordSpinner");
 
   if (!deviceName || selected.length === 0) {
     alert("Please enter a device name and select at least one section.");
     return;
   }
+
+  spinner.style.display = "inline-block";
 
   try {
     const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-docx", {
@@ -205,6 +213,7 @@ async function downloadWord() {
 
     if (!res.ok) {
       alert("Error: Failed to generate Word document");
+      spinner.style.display = "none";
       return;
     }
 
@@ -220,9 +229,10 @@ async function downloadWord() {
   } catch (err) {
     alert("Unexpected error while downloading Word file.");
     console.error(err);
+  } finally {
+    spinner.style.display = "none";
   }
-}
-    
+}    
     async function generateInputs() {
       const name = document.getElementById("deviceName").value.trim();
       const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
