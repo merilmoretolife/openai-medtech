@@ -196,21 +196,31 @@ async function downloadWord() {
     return;
   }
 
-  const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-docx", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ deviceName, sections: selected }),
-  });
+  try {
+    const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-docx", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ deviceName, sections: selected }),
+    });
 
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
-  a.click();
-  window.URL.revokeObjectURL(url);
+    if (!res.ok) {
+      alert("Error: Failed to generate Word document");
+      return;
+    }
 
-  saveHistory(deviceName, 'Word');
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    saveHistory(deviceName, 'Word');
+  } catch (err) {
+    alert("Unexpected error while downloading Word file.");
+    console.error(err);
+  }
 }
     
     async function generateInputs() {
