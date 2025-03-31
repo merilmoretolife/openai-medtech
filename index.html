@@ -188,35 +188,28 @@
     });
     
 async function downloadWord() {
-  const deviceName = document.getElementById("deviceName").value.trim() || "Unnamed Device";
-  const elements = document.querySelectorAll("#results h3, #results .results");
-  if (elements.length === 0) return alert("No content to export.");
+  const deviceName = document.getElementById("deviceName").value.trim();
+  const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
+  const selected = Array.from(checkboxes).map(cb => cb.value);
 
-  // Document Number (DI/ABC/001)
-  const deviceCode = deviceName.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, "X");
-  const docNumber = `DI/${deviceCode}/001 Rev. 00`;
+  if (!deviceName || selected.length === 0) {
+    alert("Please enter a device name and select at least one section.");
+    return;
+  }
 
-  // Fill Word export template
-  document.getElementById("docDate").innerText = new Date().toLocaleDateString();
-  document.getElementById("wordTitle").innerText = `Design Input – ${deviceName}`;
-  document.getElementById("docNumber").innerText = `Document Number: ${docNumber}`;
-  const wordSections = document.getElementById("wordSections");
-  wordSections.innerHTML = "";
-
-  // Loop over result sections
-  elements.forEach(el => {
-    const tag = el.tagName === "H3" ? "h3" : "div";
-    const wrapper = document.createElement(tag);
-    wrapper.innerText = el.innerText.replace(/[\*#]+/g, "").trim();
-    wordSections.appendChild(wrapper);
+  const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-docx", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ deviceName, sections: selected }),
   });
 
-  // Convert and export using html-docx-js
-  const content = document.getElementById("wordTemplate").innerHTML;
-  const html = `<html><head><meta charset='utf-8'></head><body>${content}</body></html>`;
-  const blob = window.htmlDocx.asBlob(html);
-  const fileName = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
-  saveAs(blob, fileName);
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Design_Input_${deviceName.replace(/\s+/g, "_")}.docx`;
+  a.click();
+  window.URL.revokeObjectURL(url);
 
   saveHistory(deviceName, 'Word');
 }
