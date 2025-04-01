@@ -171,7 +171,7 @@
 
     <button onclick="generateInputs()">Go</button>
 
-    <div class="btn-group">
+    <div class="btn-group" id="downloadButtons" style="display: none;">
       <button id="downloadPdfBtn" onclick="downloadPDF()">Download as PDF</button>
 <button id="downloadWordBtn" onclick="downloadWord()">
   Download as Word
@@ -275,6 +275,8 @@ async function downloadWord() {
 
       spinner.style.display = "none";
       resultsDiv.innerHTML = output;
+      document.getElementById("downloadButtons").style.display = "flex"; // ✅ show buttons now
+
     }
 
     async function downloadPDF() {
