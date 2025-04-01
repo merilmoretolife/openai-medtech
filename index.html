@@ -153,6 +153,9 @@
     <label for="deviceName">Generic Device:</label>
     <input type="text" id="deviceName" placeholder="Enter device name" />
 
+    <label for="intendedUse">Intended Use:</label>
+    <input type="text" id="intendedUse" placeholder="Enter intended use" />
+
     <label><input type="checkbox" id="selectAll" /> Select All Sections</label>
     <div class="checkboxes" id="sectionCheckboxes">
       <label><input type="checkbox" value="Functional and Performance Requirements"> Functional and Performance</label>
@@ -208,7 +211,7 @@ async function downloadWord() {
     const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-docx", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deviceName, sections: selected }),
+      body: JSON.stringify({ deviceName, intendedUse, sections: selected }),
     });
 
     if (!res.ok) {
@@ -235,6 +238,7 @@ async function downloadWord() {
 }    
     async function generateInputs() {
       const name = document.getElementById("deviceName").value.trim();
+      const intendedUse = document.getElementById("intendedUse").value.trim();
       const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
       const selected = Array.from(checkboxes).map(cb => cb.value);
       const resultsDiv = document.getElementById("results");
@@ -254,7 +258,7 @@ async function downloadWord() {
           const res = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ deviceName: name, sections: [section] })
+            body: JSON.stringify({ deviceName: name, intendedUse: intendedUse, sections: [section] })
           });
 
           if (!res.ok) throw new Error("API Error");
