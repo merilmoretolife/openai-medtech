@@ -197,6 +197,7 @@
     
 async function downloadWord() {
   const deviceName = document.getElementById("deviceName").value.trim();
+  const intendedUse = document.getElementById("intendedUse").value.trim();
   const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
   const selected = Array.from(checkboxes).map(cb => cb.value);
   const spinner = document.getElementById("wordSpinner");
