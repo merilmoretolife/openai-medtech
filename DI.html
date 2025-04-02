@@ -183,7 +183,7 @@
   </span>
 </button>
     </div>
-
+<button id="finalizeBtn" style="display: none;" onclick="finalizeDesignInput()">Finalize</button>
   </div>
   
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -277,7 +277,7 @@ async function downloadWord() {
       spinner.style.display = "none";
       resultsDiv.innerHTML = output;
       document.getElementById("downloadButtons").style.display = "flex"; // ✅ show buttons now
-
+      document.getElementById("finalizeBtn").style.display = "block";
     }
 
     async function downloadPDF() {
@@ -406,6 +406,37 @@ async function downloadWord() {
       history.unshift({ name: deviceName, type, time: new Date().toLocaleString() });
       localStorage.setItem("downloadHistory", JSON.stringify(history));
     }
+
+    function finalizeDesignInput() {
+  const deviceName = document.getElementById("deviceName").value.trim();
+  const intendedUse = document.getElementById("intendedUse").value.trim();
+  const resultsHtml = document.getElementById("results").innerHTML;
+
+  if (!deviceName || !resultsHtml) {
+    alert("Please complete and generate Design Input first.");
+    return;
+  }
+
+  const finalizedBy = localStorage.getItem("userId") || "anonymous";
+  const finalizedDevices = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
+
+  const newRecord = {
+    deviceName,
+    intendedUse,
+    designInputHtml: resultsHtml,
+    finalizedBy,
+    diComplete: true,
+    doComplete: false,
+    finalizedAt: new Date().toISOString()
+  };
+
+  finalizedDevices.unshift(newRecord);
+  localStorage.setItem("finalizedDevices", JSON.stringify(finalizedDevices));
+
+  // ✅ Redirect to status page
+  window.location.href = "status.html";
+}
+
   </script>
 
 <div id="wordTemplate" style="display: none;">
