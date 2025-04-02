@@ -5,6 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Status Tracker</title>
   <style>
+    .word-spinner {
+  display: none;
+  margin-left: 8px;
+}
+
+.spinner-icon {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007BFF;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
     body {
       background-color: #000;
       color: white;
@@ -85,9 +105,14 @@
           <td>${new Date(item.finalizedAt).toLocaleString()}</td>
           <td>${item.diComplete ? tick : cross}</td>
           <td>${item.doComplete ? tick : cross}</td>
-          <td>
-  <button onclick="downloadWordFromStatus(${index})">Download Word</button>
-          </td>
+         <td>
+  <button onclick="downloadWordFromStatus(${index})" id="downloadBtn${index}">
+    Download Word
+    <span class="word-spinner" id="spinner${index}">
+      <span class="spinner-icon"></span>
+    </span>
+  </button>
+</td>
           <td>
             <button onclick="openDO(${index})">Open DO</button>
           </td>
@@ -101,10 +126,15 @@
       localStorage.setItem("selectedDeviceIndex", index);
       window.location.href = "DO.html";
     }
-    async function downloadWordFromStatus(index) {
+  async function downloadWordFromStatus(index) {
   const finalizedDevices = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
   const data = finalizedDevices[index];
   const sections = extractSectionsFromHTML(data.designInputHtml);
+  const spinner = document.getElementById(`spinner${index}`);
+  const btn = document.getElementById(`downloadBtn${index}`);
+
+  spinner.style.display = "inline-block";
+  btn.disabled = true;
 
   try {
     const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-docx", {
@@ -129,6 +159,9 @@
   } catch (err) {
     alert("Error generating Word file.");
     console.error(err);
+  } finally {
+    spinner.style.display = "none";
+    btn.disabled = false;
   }
 }
 
