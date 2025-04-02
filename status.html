@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status Tracker</title>
+  <style>
+    body {
+      background-color: #000;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #444;
+      text-align: center;
+    }
+    th {
+      background-color: #222;
+    }
+    td a, td button {
+      background-color: #007BFF;
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    td a:hover, td button:hover {
+      background-color: #0056b3;
+    }
+    .tick {
+      color: #28a745;
+      font-size: 20px;
+    }
+    .cross {
+      color: #dc3545;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Status Tracker</h1>
+  <table id="statusTable">
+    <thead>
+      <tr>
+        <th>Device Name</th>
+        <th>Finalized By</th>
+        <th>Date</th>
+        <th>DI</th>
+        <th>DO</th>
+        <th>Download Word</th>
+        <th>Open DO</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const data = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
+    const tbody = document.querySelector("#statusTable tbody");
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7">No finalized devices found.</td></tr>`;
+    } else {
+      data.forEach((item, index) => {
+        const tr = document.createElement("tr");
+
+        const tick = '<span class="tick">✔</span>';
+        const cross = '<span class="cross">✘</span>';
+
+        tr.innerHTML = `
+          <td>${item.deviceName}</td>
+          <td>${item.finalizedBy}</td>
+          <td>${new Date(item.finalizedAt).toLocaleString()}</td>
+          <td>${item.diComplete ? tick : cross}</td>
+          <td>${item.doComplete ? tick : cross}</td>
+          <td>
+            <a href="Design_Input_${item.deviceName.replace(/\s+/g, "_")}.docx" download>Download</a>
+          </td>
+          <td>
+            <button onclick="openDO(${index})">Open DO</button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openDO(index) {
+      localStorage.setItem("selectedDeviceIndex", index);
+      window.location.href = "DO.html";
+    }
+  </script>
+</body>
+</html>
