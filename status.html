@@ -86,7 +86,7 @@
           <td>${item.diComplete ? tick : cross}</td>
           <td>${item.doComplete ? tick : cross}</td>
           <td>
-            <a href="Design_Input_${item.deviceName.replace(/\s+/g, "_")}.docx" download>Download</a>
+  <button onclick="downloadWordFromStatus(${index})">Download Word</button>
           </td>
           <td>
             <button onclick="openDO(${index})">Open DO</button>
@@ -101,6 +101,43 @@
       localStorage.setItem("selectedDeviceIndex", index);
       window.location.href = "DO.html";
     }
+    async function downloadWordFromStatus(index) {
+  const finalizedDevices = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
+  const data = finalizedDevices[index];
+  const sections = extractSectionsFromHTML(data.designInputHtml);
+
+  try {
+    const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-docx", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        deviceName: data.deviceName,
+        intendedUse: data.intendedUse,
+        sections: sections,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to generate Word document");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Design_Input_${data.deviceName.replace(/\s+/g, "_")}.docx`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert("Error generating Word file.");
+    console.error(err);
+  }
+}
+
+function extractSectionsFromHTML(html) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const headings = doc.querySelectorAll("h3 strong");
+  return Array.from(headings).map(h => h.innerText.trim());
+}
   </script>
 </body>
 </html>
