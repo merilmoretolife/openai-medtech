@@ -87,10 +87,20 @@
   </table>
 
   <script>
-    const data = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
+let data = [];
+
+async function loadData() {
+  const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
+  data = await res.json();
+  renderTable();
+}
     const tbody = document.querySelector("#statusTable tbody");
 
-    if (data.length === 0) {
+function renderTable() {
+  const tbody = document.querySelector("#statusTable tbody");
+  tbody.innerHTML = "";
+
+  if (data.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7">No finalized devices found.</td></tr>`;
     } else {
       data.forEach((item, index) => {
@@ -171,6 +181,7 @@ function extractSectionsFromHTML(html) {
   const headings = doc.querySelectorAll("h3 strong");
   return Array.from(headings).map(h => h.innerText.trim());
 }
+  window.onload = loadData;
   </script>
 </body>
 </html>
