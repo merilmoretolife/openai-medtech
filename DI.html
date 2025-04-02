@@ -407,53 +407,57 @@ async function downloadWord() {
       localStorage.setItem("downloadHistory", JSON.stringify(history));
     }
 
-    async function finalizeDesignInput() {
-    const deviceName = document.getElementById("deviceName").value.trim();
-    const intendedUse = document.getElementById("intendedUse").value.trim();
-    const resultsHtml = document.getElementById("results").innerHTML;
+ async function finalizeDesignInput() {
+  const deviceName = document.getElementById("deviceName").value.trim();
+  const intendedUse = document.getElementById("intendedUse").value.trim();
+  const resultsHtml = document.getElementById("results").innerHTML;
 
-    if (!deviceName || !resultsHtml) {
-      alert("Please complete and generate Design Input first.");
-      return;
-    }
-
-    // ✅ Ask for credentials
-    const userId = prompt("Enter your User ID:");
-    const password = prompt("Enter your Password:");
-
-    // ✅ Validate against hardcoded users
-    const validUsers = {
-      "rahul.fidai": "Meril@123",
-      "umesh.sharma": "Meril@123",
-    };
-
-    if (!userId || !password || validUsers[userId.toLowerCase()] !== password) {
-      alert("Invalid credentials. Finalization aborted.");
-      return;
-    }
-
-    // ✅ Store userId in localStorage for reuse
-    localStorage.setItem("userId", userId);
-
-    const finalizedDevices = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
-
-    const newRecord = {
-      deviceName,
-      intendedUse,
-      designInputHtml: resultsHtml,
-      finalizedBy: userId,
-      diComplete: true,
-      doComplete: false,
-      finalizedAt: new Date().toISOString()
-    };
-
-    finalizedDevices.unshift(newRecord);
-    localStorage.setItem("finalizedDevices", JSON.stringify(finalizedDevices));
-
-    // ✅ Redirect to status page
-    window.location.href = "status.html";
+  if (!deviceName || !resultsHtml) {
+    alert("Please complete and generate Design Input first.");
+    return;
   }
 
+  const userId = await promptForCredentials();
+  if (!userId) return;
+
+  const newRecord = {
+    deviceName,
+    intendedUse,
+    designInputHtml: resultsHtml,
+    finalizedBy: userId,
+    diComplete: true,
+    doComplete: false,
+    finalizedAt: new Date().toISOString()
+  };
+
+  const res = await fetch("https://your-backend-url.onrender.com/finalize-di", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newRecord),
+  });
+
+  if (!res.ok) {
+    alert("❌ Failed to finalize. Try again.");
+    return;
+  }
+
+  window.location.href = "status.html";
+   
+}
+async function promptForCredentials() {
+  const userId = prompt("Enter your User ID:");
+  const password = prompt("Enter your password:");
+
+  const users = {
+    "neha": "1234",
+    "rahul": "abcd"
+  };
+
+  if (users[userId] === password) return userId;
+
+  alert("❌ Invalid credentials.");
+  return null;
+}
   </script>
 
 <div id="wordTemplate" style="display: none;">
