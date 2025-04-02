@@ -407,35 +407,52 @@ async function downloadWord() {
       localStorage.setItem("downloadHistory", JSON.stringify(history));
     }
 
-    function finalizeDesignInput() {
-  const deviceName = document.getElementById("deviceName").value.trim();
-  const intendedUse = document.getElementById("intendedUse").value.trim();
-  const resultsHtml = document.getElementById("results").innerHTML;
+    async function finalizeDesignInput() {
+    const deviceName = document.getElementById("deviceName").value.trim();
+    const intendedUse = document.getElementById("intendedUse").value.trim();
+    const resultsHtml = document.getElementById("results").innerHTML;
 
-  if (!deviceName || !resultsHtml) {
-    alert("Please complete and generate Design Input first.");
-    return;
+    if (!deviceName || !resultsHtml) {
+      alert("Please complete and generate Design Input first.");
+      return;
+    }
+
+    // ✅ Ask for credentials
+    const userId = prompt("Enter your User ID:");
+    const password = prompt("Enter your Password:");
+
+    // ✅ Validate against hardcoded users
+    const validUsers = {
+      "rahul.fidai": "Meril@123",
+      "umesh.sharma": "Meril@123",
+    };
+
+    if (!userId || !password || validUsers[userId.toLowerCase()] !== password) {
+      alert("Invalid credentials. Finalization aborted.");
+      return;
+    }
+
+    // ✅ Store userId in localStorage for reuse
+    localStorage.setItem("userId", userId);
+
+    const finalizedDevices = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
+
+    const newRecord = {
+      deviceName,
+      intendedUse,
+      designInputHtml: resultsHtml,
+      finalizedBy: userId,
+      diComplete: true,
+      doComplete: false,
+      finalizedAt: new Date().toISOString()
+    };
+
+    finalizedDevices.unshift(newRecord);
+    localStorage.setItem("finalizedDevices", JSON.stringify(finalizedDevices));
+
+    // ✅ Redirect to status page
+    window.location.href = "status.html";
   }
-
-  const finalizedBy = localStorage.getItem("userId") || "anonymous";
-  const finalizedDevices = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
-
-  const newRecord = {
-    deviceName,
-    intendedUse,
-    designInputHtml: resultsHtml,
-    finalizedBy,
-    diComplete: true,
-    doComplete: false,
-    finalizedAt: new Date().toISOString()
-  };
-
-  finalizedDevices.unshift(newRecord);
-  localStorage.setItem("finalizedDevices", JSON.stringify(finalizedDevices));
-
-  // ✅ Redirect to status page
-  window.location.href = "status.html";
-}
 
   </script>
 
