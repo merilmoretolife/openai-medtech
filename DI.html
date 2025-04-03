@@ -407,43 +407,58 @@ async function downloadWord() {
       localStorage.setItem("downloadHistory", JSON.stringify(history));
     }
 
- async function finalizeDesignInput() {
+async function finalizeDesignInput() {
   const deviceName = document.getElementById("deviceName").value.trim();
   const intendedUse = document.getElementById("intendedUse").value.trim();
-  const resultsHtml = document.getElementById("results").innerHTML;
+  const designInputHtml = document.getElementById("results").innerHTML;
 
-  if (!deviceName || !resultsHtml) {
-    alert("Please complete and generate Design Input first.");
+  const userId = prompt("Enter user ID:");
+  const password = prompt("Enter password:");
+
+  if (!deviceName || !designInputHtml || !userId || !password) {
+    alert("Missing information.");
     return;
   }
 
-  const userId = await promptForCredentials();
-  if (!userId) return;
+  // Only allow specific credentials
+  const allowedUsers = {
+    neha: "neha123",
+    rahul: "rahul123"
+  };
 
-  const newRecord = {
+  if (allowedUsers[userId.toLowerCase()] !== password) {
+    alert("Invalid credentials.");
+    return;
+  }
+
+  const record = {
     deviceName,
     intendedUse,
-    designInputHtml: resultsHtml,
+    designInputHtml,
     finalizedBy: userId,
     diComplete: true,
     doComplete: false,
     finalizedAt: new Date().toISOString()
   };
 
-  const res = await fetch("https://your-backend-url.onrender.com/finalize-di", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newRecord),
-  });
+  try {
+    await fetch("https://medtech-api-jjqj.onrender.com/finalize-di", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record)
+    });
 
-  if (!res.ok) {
-    alert("❌ Failed to finalize. Try again.");
-    return;
+    // Save user ID for the session (optional)
+    localStorage.setItem("userId", userId);
+
+    // Go to status tracker
+    window.location.href = "status.html";
+  } catch (err) {
+    alert("Finalization failed.");
+    console.error(err);
   }
-
-  window.location.href = "status.html";
-   
 }
+    
 async function promptForCredentials() {
   const userId = prompt("Enter your User ID:");
   const password = prompt("Enter your password:");
