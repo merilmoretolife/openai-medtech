@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Status Tracker</title>
   <style>
     body {
@@ -47,6 +47,25 @@
       color: #dc3545;
       font-size: 20px;
     }
+
+    /* Spinner styles */
+    .word-spinner {
+      display: none;
+      margin-left: 8px;
+    }
+    .spinner-icon {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007BFF;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -65,105 +84,110 @@
     </thead>
     <tbody></tbody>
   </table>
-  
-<script>
-let data = [];
 
-async function loadData() {
-  const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
-  data = await res.json();
-  renderTable();
-}
+  <script>
+    let data = [];
 
-function renderTable() {
-  const tbody = document.querySelector("#statusTable tbody");
-  tbody.innerHTML = "";
+    async function loadData() {
+      try {
+        const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
+        if (!res.ok) throw new Error("Failed to fetch finalized devices");
+        data = await res.json();
+        renderTable();
+      } catch (err) {
+        console.error("Load failed:", err);
+        const tbody = document.querySelector("#statusTable tbody");
+        tbody.innerHTML = `<tr><td colspan="7">Error loading data</td></tr>`;
+      }
+    }
 
-  if (data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7">No finalized devices found.</td></tr>`;
-    return;
-  }
+    function renderTable() {
+      const tbody = document.querySelector("#statusTable tbody");
+      tbody.innerHTML = "";
 
-  data.forEach((item, index) => {
-    const tr = document.createElement("tr");
-    const tick = '<span class="tick">✔</span>';
-    const cross = '<span class="cross">✘</span>';
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7">No finalized devices found.</td></tr>`;
+        return;
+      }
 
-    tr.innerHTML = `
-      <td>${item.deviceName}</td>
-      <td>${item.finalizedBy}</td>
-      <td>${new Date(item.finalizedAt).toLocaleString()}</td>
-      <td>${item.diComplete ? tick : cross}</td>
-      <td>${item.doComplete ? tick : cross}</td>
-      <td>
-        <button onclick="downloadWordFromStatus(${index})" id="downloadBtn${index}">
-          Download Word
-          <span class="word-spinner" id="spinner${index}">
-            <span class="spinner-icon"></span>
-          </span>
-        </button>
-      </td>
-      <td>
-        <button onclick="openDO(${index})">Open DO</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+      data.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        const tick = '<span class="tick">✔</span>';
+        const cross = '<span class="cross">✘</span>';
 
-function openDO(index) {
-  localStorage.setItem("selectedDeviceIndex", index);
-  window.location.href = "DO.html";
-}
+        tr.innerHTML = `
+          <td>${item.deviceName}</td>
+          <td>${item.finalizedBy}</td>
+          <td>${new Date(item.finalizedAt).toLocaleString()}</td>
+          <td>${item.diComplete ? tick : cross}</td>
+          <td>${item.doComplete ? tick : cross}</td>
+          <td>
+            <button onclick="downloadWordFromStatus(${index})" id="downloadBtn${index}">
+              Download Word
+              <span class="word-spinner" id="spinner${index}">
+                <span class="spinner-icon"></span>
+              </span>
+            </button>
+          </td>
+          <td>
+            <button onclick="openDO(${index})">Open DO</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-async function downloadWordFromStatus(index) {
-  const finalizedDevices = data;
-  const device = finalizedDevices[index];
-  const sections = extractSectionsFromHTML(device.designInputHtml);
-  const spinner = document.getElementById(`spinner${index}`);
-  const btn = document.getElementById(`downloadBtn${index}`);
+    function openDO(index) {
+      localStorage.setItem("selectedDeviceIndex", index);
+      window.location.href = "DO.html";
+    }
 
-  spinner.style.display = "inline-block";
-  btn.disabled = true;
+    async function downloadWordFromStatus(index) {
+      const device = data[index];
+      const sections = extractSectionsFromHTML(device.designInputHtml);
+      const spinner = document.getElementById(`spinner${index}`);
+      const btn = document.getElementById(`downloadBtn${index}`);
 
-  try {
-    const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-docx", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        deviceName: device.deviceName,
-        intendedUse: device.intendedUse,
-        sections: sections,
-      }),
-    });
+      spinner.style.display = "inline-block";
+      btn.disabled = true;
 
-    if (!res.ok) throw new Error("Failed to generate Word document");
+      try {
+        const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-docx", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            deviceName: device.deviceName,
+            intendedUse: device.intendedUse,
+            sections: sections,
+          }),
+        });
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Design_Input_${device.deviceName.replace(/\s+/g, "_")}.docx`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    alert("Error generating Word file.");
-    console.error(err);
-  } finally {
-    spinner.style.display = "none";
-    btn.disabled = false;
-  }
-}
+        if (!res.ok) throw new Error("Failed to generate Word document");
 
-function extractSectionsFromHTML(html) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, "text/html");
-  const headings = doc.querySelectorAll("h3 strong");
-  return Array.from(headings).map(h => h.innerText.trim());
-}
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Design_Input_${device.deviceName.replace(/\s+/g, "_")}.docx`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (err) {
+        alert("Error generating Word file.");
+        console.error(err);
+      } finally {
+        spinner.style.display = "none";
+        btn.disabled = false;
+      }
+    }
 
-// Load data when page loads
-window.onload = loadData;
-</script>
+    function extractSectionsFromHTML(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const headings = doc.querySelectorAll("h3 strong");
+      return Array.from(headings).map(h => h.innerText.trim());
+    }
+
+    window.onload = loadData;
+  </script>
 </body>
 </html>
