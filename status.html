@@ -1,92 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Status Tracker</title>
-  <style>
-    .word-spinner {
-  display: none;
-  margin-left: 8px;
-}
-
-.spinner-icon {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #007BFF;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite;
-  display: inline-block;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-    body {
-      background-color: #000;
-      color: white;
-      font-family: Arial, sans-serif;
-      padding: 30px;
-    }
-    h1 {
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #444;
-      text-align: center;
-    }
-    th {
-      background-color: #222;
-    }
-    td a, td button {
-      background-color: #007BFF;
-      color: white;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    td a:hover, td button:hover {
-      background-color: #0056b3;
-    }
-    .tick {
-      color: #28a745;
-      font-size: 20px;
-    }
-    .cross {
-      color: #dc3545;
-      font-size: 20px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Status Tracker</h1>
-  <table id="statusTable">
-    <thead>
-      <tr>
-        <th>Device Name</th>
-        <th>Finalized By</th>
-        <th>Date</th>
-        <th>DI</th>
-        <th>DO</th>
-        <th>Download Word</th>
-        <th>Open DO</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script>
+<script>
 let data = [];
 
 async function loadData() {
@@ -94,52 +6,52 @@ async function loadData() {
   data = await res.json();
   renderTable();
 }
-    const tbody = document.querySelector("#statusTable tbody");
 
 function renderTable() {
   const tbody = document.querySelector("#statusTable tbody");
   tbody.innerHTML = "";
 
   if (data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7">No finalized devices found.</td></tr>`;
-    } else {
-      data.forEach((item, index) => {
-        const tr = document.createElement("tr");
+    tbody.innerHTML = `<tr><td colspan="7">No finalized devices found.</td></tr>`;
+    return;
+  }
 
-        const tick = '<span class="tick">✔</span>';
-        const cross = '<span class="cross">✘</span>';
+  data.forEach((item, index) => {
+    const tr = document.createElement("tr");
+    const tick = '<span class="tick">✔</span>';
+    const cross = '<span class="cross">✘</span>';
 
-        tr.innerHTML = `
-          <td>${item.deviceName}</td>
-          <td>${item.finalizedBy}</td>
-          <td>${new Date(item.finalizedAt).toLocaleString()}</td>
-          <td>${item.diComplete ? tick : cross}</td>
-          <td>${item.doComplete ? tick : cross}</td>
-         <td>
-  <button onclick="downloadWordFromStatus(${index})" id="downloadBtn${index}">
-    Download Word
-    <span class="word-spinner" id="spinner${index}">
-      <span class="spinner-icon"></span>
-    </span>
-  </button>
-</td>
-          <td>
-            <button onclick="openDO(${index})">Open DO</button>
-          </td>
-        `;
+    tr.innerHTML = `
+      <td>${item.deviceName}</td>
+      <td>${item.finalizedBy}</td>
+      <td>${new Date(item.finalizedAt).toLocaleString()}</td>
+      <td>${item.diComplete ? tick : cross}</td>
+      <td>${item.doComplete ? tick : cross}</td>
+      <td>
+        <button onclick="downloadWordFromStatus(${index})" id="downloadBtn${index}">
+          Download Word
+          <span class="word-spinner" id="spinner${index}">
+            <span class="spinner-icon"></span>
+          </span>
+        </button>
+      </td>
+      <td>
+        <button onclick="openDO(${index})">Open DO</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-        tbody.appendChild(tr);
-      });
-    }
+function openDO(index) {
+  localStorage.setItem("selectedDeviceIndex", index);
+  window.location.href = "DO.html";
+}
 
-    function openDO(index) {
-      localStorage.setItem("selectedDeviceIndex", index);
-      window.location.href = "DO.html";
-    }
-  async function downloadWordFromStatus(index) {
-  const finalizedDevices = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
-  const data = finalizedDevices[index];
-  const sections = extractSectionsFromHTML(data.designInputHtml);
+async function downloadWordFromStatus(index) {
+  const finalizedDevices = data;
+  const device = finalizedDevices[index];
+  const sections = extractSectionsFromHTML(device.designInputHtml);
   const spinner = document.getElementById(`spinner${index}`);
   const btn = document.getElementById(`downloadBtn${index}`);
 
@@ -151,8 +63,8 @@ function renderTable() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        deviceName: data.deviceName,
-        intendedUse: data.intendedUse,
+        deviceName: device.deviceName,
+        intendedUse: device.intendedUse,
         sections: sections,
       }),
     });
@@ -163,7 +75,7 @@ function renderTable() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Design_Input_${data.deviceName.replace(/\s+/g, "_")}.docx`;
+    a.download = `Design_Input_${device.deviceName.replace(/\s+/g, "_")}.docx`;
     a.click();
     window.URL.revokeObjectURL(url);
   } catch (err) {
@@ -181,7 +93,7 @@ function extractSectionsFromHTML(html) {
   const headings = doc.querySelectorAll("h3 strong");
   return Array.from(headings).map(h => h.innerText.trim());
 }
-  window.onload = loadData;
-  </script>
-</body>
-</html>
+
+// Load data when page loads
+window.onload = loadData;
+</script>
