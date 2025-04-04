@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -238,65 +239,47 @@ async function downloadWord() {
   } finally {
     spinner.style.display = "none";
   }
-}  
-    
-async function generateInputs() {
-  const name = document.getElementById("deviceName").value.trim();
-  const intendedUse = document.getElementById("intendedUse").value.trim();
-  const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
-  const selected = Array.from(checkboxes).map(cb => cb.value);
-  const resultsDiv = document.getElementById("results");
+}    
+    async function generateInputs() {
+      const name = document.getElementById("deviceName").value.trim();
+      const intendedUse = document.getElementById("intendedUse").value.trim();
+      const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
+      const selected = Array.from(checkboxes).map(cb => cb.value);
+      const resultsDiv = document.getElementById("results");
+      const spinner = document.getElementById("spinner");
 
-  if (!name || selected.length === 0) {
-    alert("Please enter a device name and select at least one section.");
-    return;
-  }
+      if (!name || selected.length === 0) {
+        alert("Please enter a device name and select at least one section.");
+        return;
+      }
 
-  resultsDiv.innerHTML = "";
-  document.getElementById("downloadButtons").style.display = "none";
-  document.getElementById("finalizeBtn").style.display = "none";
+      spinner.style.display = "block";
+      resultsDiv.innerHTML = "";
 
-  for (const section of selected) {
-    const sectionTitle = `<h3><strong>${section}</strong></h3>`;
-    const sectionContainer = document.createElement("div");
-    sectionContainer.innerHTML = `${sectionTitle}<div class='results'>⏳</div>`;
-    resultsDiv.appendChild(sectionContainer);
+      let output = "";
+      for (const section of selected) {
+        try {
+          const res = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ deviceName: name, intendedUse: intendedUse, sections: [section] })
+          });
 
-    await streamSectionContent(name, intendedUse, section, sectionContainer);
-  }
+          if (!res.ok) throw new Error("API Error");
 
-  document.getElementById("downloadButtons").style.display = "flex";
-  document.getElementById("finalizeBtn").style.display = "block";
-}
+          const data = await res.json();
+          const cleaned = data.results[section].replace(/[\*#]+/g, "").trim();
+          output += `<h3><strong>${section}</strong></h3><div class='results'>${cleaned}</div>`;
+        } catch (err) {
+          output += `<h3><strong>${section}</strong></h3><div class='results'>❌ Error loading section: ${err.message}</div>`;
+        }
+      }
 
-    async function streamSectionContent(deviceName, intendedUse, section, container) {
-  const response = await fetch("https://medtech-api-jjqj.onrender.com/generate-stream", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    deviceName: deviceName,
-    intendedUse: intendedUse,
-    section: section
-  })
-});
-
-  if (!response.ok) {
-    container.querySelector(".results").innerText = `❌ Error loading section`;
-    return;
-  }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-  const resultDiv = container.querySelector(".results");
-  resultDiv.innerText = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    resultDiv.innerText += decoder.decode(value, { stream: true });
-    resultDiv.scrollTop = resultDiv.scrollHeight;
-  }
-}
+      spinner.style.display = "none";
+      resultsDiv.innerHTML = output;
+      document.getElementById("downloadButtons").style.display = "flex"; // ✅ show buttons now
+      document.getElementById("finalizeBtn").style.display = "block";
+    }
 
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
