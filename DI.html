@@ -173,6 +173,7 @@
     <button onclick="generateInputs()">Go</button>
     
     <div id="spinner"></div>
+    <div id="progressText" style="color: #fff; text-align: center; font-size: 16px; margin-top: 8px;"></div>
     <div class="section" id="results"></div>
     
     <div class="btn-group" id="downloadButtons" style="display: none;">
@@ -240,47 +241,56 @@ async function downloadWord() {
     spinner.style.display = "none";
   }
 }    
-    async function generateInputs() {
-      const name = document.getElementById("deviceName").value.trim();
-      const intendedUse = document.getElementById("intendedUse").value.trim();
-      const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
-      const selected = Array.from(checkboxes).map(cb => cb.value);
-      const resultsDiv = document.getElementById("results");
-      const spinner = document.getElementById("spinner");
+   async function generateInputs() {
+  const name = document.getElementById("deviceName").value.trim();
+  const intendedUse = document.getElementById("intendedUse").value.trim();
+  const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
+  const selected = Array.from(checkboxes).map(cb => cb.value);
+  const resultsDiv = document.getElementById("results");
+  const spinner = document.getElementById("spinner");
+  const progressText = document.getElementById("progressText");
 
-      if (!name || selected.length === 0) {
-        alert("Please enter a device name and select at least one section.");
-        return;
-      }
+  if (!name || selected.length === 0) {
+    alert("Please enter a device name and select at least one section.");
+    return;
+  }
 
-      spinner.style.display = "block";
-      resultsDiv.innerHTML = "";
+  spinner.style.display = "block";
+  progressText.innerText = "Progress: 0%";
+  resultsDiv.innerHTML = "";
 
-      let output = "";
-      for (const section of selected) {
-        try {
-          const res = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ deviceName: name, intendedUse: intendedUse, sections: [section] })
-          });
+  let output = "";
+  let completed = 0;
 
-          if (!res.ok) throw new Error("API Error");
+  for (const section of selected) {
+    try {
+      const res = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceName: name, intendedUse: intendedUse, sections: [section] })
+      });
 
-          const data = await res.json();
-          const cleaned = data.results[section].replace(/[\*#]+/g, "").trim();
-          output += `<h3><strong>${section}</strong></h3><div class='results'>${cleaned}</div>`;
-        } catch (err) {
-          output += `<h3><strong>${section}</strong></h3><div class='results'>❌ Error loading section: ${err.message}</div>`;
-        }
-      }
+      if (!res.ok) throw new Error("API Error");
 
-      spinner.style.display = "none";
-      resultsDiv.innerHTML = output;
-      document.getElementById("downloadButtons").style.display = "flex"; // ✅ show buttons now
-      document.getElementById("finalizeBtn").style.display = "block";
+      const data = await res.json();
+      const cleaned = data.results[section].replace(/[\*#]+/g, "").trim();
+      output += `<h3><strong>${section}</strong></h3><div class='results'>${cleaned}</div>`;
+    } catch (err) {
+      output += `<h3><strong>${section}</strong></h3><div class='results'>❌ Error loading section: ${err.message}</div>`;
     }
 
+    completed++;
+    const percent = Math.round((completed / selected.length) * 100);
+    progressText.innerText = `Progress: ${completed}/${selected.length} (${percent}%)`;
+  }
+
+  spinner.style.display = "none";
+  progressText.innerText = "✅ Completed!";
+  resultsDiv.innerHTML = output;
+  document.getElementById("downloadButtons").style.display = "flex";
+  document.getElementById("finalizeBtn").style.display = "block";
+}
+    
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: "landscape" });
