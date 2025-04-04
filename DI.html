@@ -240,45 +240,48 @@ async function downloadWord() {
   }
 }    
     async function generateInputs() {
-      const name = document.getElementById("deviceName").value.trim();
-      const intendedUse = document.getElementById("intendedUse").value.trim();
-      const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
-      const selected = Array.from(checkboxes).map(cb => cb.value);
-      const resultsDiv = document.getElementById("results");
-      const spinner = document.getElementById("spinner");
+  const name = document.getElementById("deviceName").value.trim();
+  const intendedUse = document.getElementById("intendedUse").value.trim();
+  const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
+  const selected = Array.from(checkboxes).map(cb => cb.value);
+  const resultsDiv = document.getElementById("results");
+  const spinner = document.getElementById("spinner");
 
-      if (!name || selected.length === 0) {
-        alert("Please enter a device name and select at least one section.");
-        return;
-      }
+  if (!name || selected.length === 0) {
+    alert("Please enter a device name and select at least one section.");
+    return;
+  }
 
-      spinner.style.display = "block";
-      resultsDiv.innerHTML = "";
+  resultsDiv.innerHTML = ""; // Clear previous results
+  document.getElementById("downloadButtons").style.display = "none";
+  document.getElementById("finalizeBtn").style.display = "none";
 
-      let output = "";
-      for (const section of selected) {
-        try {
-          const res = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ deviceName: name, intendedUse: intendedUse, sections: [section] })
-          });
+  for (const section of selected) {
+    const sectionTitle = `<h3><strong>${section}</strong></h3>`;
+    const sectionContainer = document.createElement("div");
+    sectionContainer.innerHTML = `${sectionTitle}<div class='results'>⏳ Generating...</div>`;
+    resultsDiv.appendChild(sectionContainer);
 
-          if (!res.ok) throw new Error("API Error");
+    try {
+      const res = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceName: name, intendedUse: intendedUse, sections: [section] })
+      });
 
-          const data = await res.json();
-          const cleaned = data.results[section].replace(/[\*#]+/g, "").trim();
-          output += `<h3><strong>${section}</strong></h3><div class='results'>${cleaned}</div>`;
-        } catch (err) {
-          output += `<h3><strong>${section}</strong></h3><div class='results'>❌ Error loading section: ${err.message}</div>`;
-        }
-      }
+      if (!res.ok) throw new Error("API Error");
 
-      spinner.style.display = "none";
-      resultsDiv.innerHTML = output;
-      document.getElementById("downloadButtons").style.display = "flex"; // ✅ show buttons now
-      document.getElementById("finalizeBtn").style.display = "block";
+      const data = await res.json();
+      const cleaned = data.results[section].replace(/[\*#]+/g, "").trim();
+      sectionContainer.querySelector(".results").innerText = cleaned;
+    } catch (err) {
+      sectionContainer.querySelector(".results").innerText = `❌ Error loading section: ${err.message}`;
     }
+  }
+
+  document.getElementById("downloadButtons").style.display = "flex";
+  document.getElementById("finalizeBtn").style.display = "block";
+}
 
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
