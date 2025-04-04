@@ -271,10 +271,14 @@ async function generateInputs() {
 
     async function streamSectionContent(deviceName, intendedUse, section, container) {
   const response = await fetch("https://medtech-api-jjqj.onrender.com/generate-stream", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ deviceName, intendedUse, section })
-  });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    deviceName: deviceName,
+    intendedUse: intendedUse,
+    section: section
+  })
+});
 
   if (!response.ok) {
     container.querySelector(".results").innerText = `❌ Error loading section`;
