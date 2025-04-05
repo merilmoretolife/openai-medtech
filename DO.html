@@ -108,36 +108,40 @@ document.getElementById("outputContainer").innerHTML = `
 }
     window.onload = loadDO;
 
-  function formatDesignOutput(markdown) {
+ function formatDesignOutput(markdown) {
   let html = markdown;
 
-  // 1. Bold section headers like "1. Material of Construction"
-  html = html.replace(/^###\s*(\d+\.\s.+)$/gm, '<h3><strong>$1</strong></h3>');
+  // Format headers like '1. Material of Construction'
+  html = html.replace(/^#{1,6}\s*(.+)$/gm, (match, p1) => `<h3><strong>${p1.trim()}</strong></h3>`);
 
-  // 2. Split into section blocks for clean display
+  // Fix: Convert table-looking tab-separated values into pipe-separated ones
+  html = html.replace(/^([^\|\n]+\t[^\n]+)$/gm, row =>
+    '|' + row.trim().split('\t').map(cell => cell.trim()).join('|') + '|'
+  );
+
+  // Process all markdown tables into HTML tables
+  html = html.replace(
+    /^\|(.+)\|\n\|([ -:\|]+)\|\n((?:\|.*\|\n?)*)/gm,
+    (match, headerRow, separatorRow, bodyRows) => {
+      const headers = headerRow.trim().split('|').map(h => `<th>${h.trim()}</th>`).join('');
+      const rows = bodyRows.trim().split('\n').map(row =>
+        '<tr>' + row.trim().split('|').map(cell => `<td>${cell.trim()}</td>`).join('') + '</tr>'
+      ).join('');
+      return `
+        <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; margin-top: 10px; color: white;">
+          <thead style="background-color: #222;"><tr>${headers}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+  );
+
+  // Ensure multiple paragraphs get separated
   html = html.replace(/\n{2,}/g, '</div><div class="results">');
+
+  // Wrap everything in a div
   html = `<div class="results">` + html + `</div>`;
 
-  // 3. Convert markdown tables to styled HTML tables
-  if (html.includes('|')) {
-    html = html.replace(
-      /^\|(.+)\|\n\|([ -:\|]+)\|\n((?:\|.*\|\n?)*)/gm,
-      (match, headerRow, separatorRow, bodyRows) => {
-        const headers = headerRow.trim().split('|').map(h => `<th>${h.trim()}</th>`).join('');
-        const rows = bodyRows.trim().split('\n').map(row =>
-          '<tr>' + row.trim().split('|').map(cell => `<td>${cell.trim()}</td>`).join('') + '</tr>'
-        ).join('');
-        return `
-          <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; margin-top: 10px; color: white;">
-            <thead style="background-color: #222;">${headers}</thead>
-            <tbody>${rows}</tbody>
-          </table>
-        `;
-      }
-    );
-  }
-
-  // 4. Convert remaining newlines to <br> (except inside tables)
+  // Convert remaining line breaks to <br>
   html = html.replace(/\n/g, '<br>');
 
   return html;
