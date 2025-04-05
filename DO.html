@@ -87,12 +87,14 @@
     const data = await doRes.json();
 
     if (data.result) {
-      document.getElementById("outputContainer").innerHTML = `
-        <div class="section">
-          <h2>${section}</h2>
-          <div style="white-space: pre-wrap;">${data.result}</div>
-        </div>
-      `;
+     const formattedHTML = formatDesignOutput(data.result);
+
+document.getElementById("outputContainer").innerHTML = `
+  <div class="section">
+    <h2>${section}</h2>
+    ${formattedHTML}
+  </div>
+`;
       document.getElementById("loading").style.display = "none";
       document.getElementById("outputContainer").style.display = "block";
     } else {
@@ -105,6 +107,42 @@
   }
 }
     window.onload = loadDO;
+
+  function formatDesignOutput(markdown) {
+  let html = markdown;
+
+  // 1. Bold section headers like "1. Material of Construction"
+  html = html.replace(/^###\s*(\d+\.\s.+)$/gm, '<h3><strong>$1</strong></h3>');
+
+  // 2. Split into section blocks for clean display
+  html = html.replace(/\n{2,}/g, '</div><div class="results">');
+  html = `<div class="results">` + html + `</div>`;
+
+  // 3. Convert markdown tables to styled HTML tables
+  if (html.includes('|')) {
+    html = html.replace(
+      /^\|(.+)\|\n\|([ -:\|]+)\|\n((?:\|.*\|\n?)*)/gm,
+      (match, headerRow, separatorRow, bodyRows) => {
+        const headers = headerRow.trim().split('|').map(h => `<th>${h.trim()}</th>`).join('');
+        const rows = bodyRows.trim().split('\n').map(row =>
+          '<tr>' + row.trim().split('|').map(cell => `<td>${cell.trim()}</td>`).join('') + '</tr>'
+        ).join('');
+        return `
+          <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; margin-top: 10px; color: white;">
+            <thead style="background-color: #222;">${headers}</thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+      }
+    );
+  }
+
+  // 4. Convert remaining newlines to <br> (except inside tables)
+  html = html.replace(/\n/g, '<br>');
+
+  return html;
+}
+    
   </script>
 </body>
 </html>
