@@ -55,44 +55,55 @@
   <div id="doResult" style="white-space: normal; background: #111; color: white; padding: 20px; border-radius: 10px; margin-top: 20px;"></div>
 
   <script>
+    
     async function loadDO() {
-      const index = localStorage.getItem("selectedDeviceIndex");
-      const devices = JSON.parse(localStorage.getItem("finalizedDevices") || "[]");
-      const device = devices[index];
+  const index = localStorage.getItem("selectedDeviceIndex");
 
-      const section = "Functional and Performance Requirements"; // 🔧 Start with first section
-      const payload = {
-        deviceName: device.deviceName,
-        intendedUse: device.intendedUse,
-        section: section
-      };
+  try {
+    const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
+    const devices = await res.json();
 
-      try {
-        const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-do", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-        if (data.result) {
-          document.getElementById("outputContainer").innerHTML = `
-            <div class="section">
-              <h2>${section}</h2>
-              <div>${marked.parse(data.result)}</div>
-            </div>
-          `;
-          document.getElementById("loading").style.display = "none";
-          document.getElementById("outputContainer").style.display = "block";
-        } else {
-          throw new Error(data.error || "Unknown error");
-        }
-      } catch (err) {
-        document.getElementById("loading").innerHTML = `<p>❌ Failed to load design output. Please try again later.</p>`;
-        console.error(err);
-      }
+    if (!devices || !devices[index]) {
+      console.error("❌ Finalized device not found.");
+      document.getElementById("loading").innerHTML = `<p>❌ Finalized device not found.</p>`;
+      return;
     }
 
+    const device = devices[index];
+    const section = "Functional and Performance Requirements";
+
+    const payload = {
+      deviceName: device.deviceName,
+      intendedUse: device.intendedUse,
+      section: section
+    };
+
+    const doRes = await fetch("https://medtech-api-jjqj.onrender.com/generate-do", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await doRes.json();
+
+    if (data.result) {
+      document.getElementById("outputContainer").innerHTML = `
+        <div class="section">
+          <h2>${section}</h2>
+          <div style="white-space: pre-wrap;">${data.result}</div>
+        </div>
+      `;
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("outputContainer").style.display = "block";
+    } else {
+      throw new Error(data.error || "Unknown error");
+    }
+
+  } catch (err) {
+    document.getElementById("loading").innerHTML = `<p>❌ Failed to load design output. Please try again later.</p>`;
+    console.error(err);
+  }
+}
     window.onload = loadDO;
   </script>
 </body>
