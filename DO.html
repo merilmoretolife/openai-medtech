@@ -109,12 +109,21 @@ document.getElementById("outputContainer").innerHTML = `
     window.onload = loadDO;
 
 function formatDesignOutput(markdown) {
-  let html = markdown;
+  let html = markdown.trim();
 
-  // Convert ### 1. ... style headers to <h3><strong>...</strong></h3>
-  html = html.replace(/^###\s*(\d+\.\s.+)$/gm, '<h3><strong>$1</strong></h3>');
+  // Remove raw markdown stars and hashes
+  html = html.replace(/^[#\*]+/gm, ""); // remove #, **, *, etc. from start of lines
+  html = html.replace(/\*\*/g, ""); // remove remaining bold stars
 
-  // Fix tables (robust parser)
+  // Fix section title (usually starts with: # Functional and Performance...)
+  html = html.replace(/^Functional and Performance Requirements.*$/im, match => {
+    return `<h2>${match.trim()}</h2>`;
+  });
+
+  // Fix numbered subsection headers like "## 1. Material of Construction"
+  html = html.replace(/^##\s*(\d+\.\s.+)$/gm, '<h3><strong>$1</strong></h3>');
+
+  // Wrap tables in proper tags
   html = html.replace(/((^\|.+\|\n)+)/gm, (match) => {
     const lines = match.trim().split("\n");
     if (lines.length < 2) return match;
@@ -126,18 +135,21 @@ function formatDesignOutput(markdown) {
     }).join("");
 
     return `
-      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; margin-top: 10px;">
+      <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; margin-top: 10px; width: 100%;">
         <thead><tr>${headerCells}</tr></thead>
         <tbody>${bodyRows}</tbody>
       </table>
     `;
   });
 
-  // Wrap content in result section
-  html = `<div class="results">${html}</div>`;
+  // Make sure each h3 starts a new section block
+  html = html.replace(/<h3><strong>/g, '</div><div class="results"><h3><strong>');
 
-  // Replace newlines with <br> only for non-table text
-  html = html.replace(/([^\n])\n([^\n|])/g, "$1<br>$2");
+  // Add one big container and ensure the first <div class="results"> starts early
+  html = `<div class="results">` + html + `</div>`;
+
+  // Final cleanup: remove multiple newlines and normalize <br>
+  html = html.replace(/\n{2,}/g, '<br><br>').replace(/\n/g, '<br>');
 
   return html;
 }
