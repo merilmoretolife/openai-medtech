@@ -423,15 +423,17 @@ async function finalizeDesignInput() {
   const intendedUse = document.getElementById("intendedUse").value.trim();
   const designInputHtml = document.getElementById("results").innerHTML;
 
+  const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
+  const sections = Array.from(checkboxes).map(cb => cb.value); // ✅ DEFINE THIS FIRST!
+
   const userId = prompt("Enter user ID:");
   const password = prompt("Enter password:");
 
-  if (!deviceName || !designInputHtml || !userId || !password) {
+  if (!deviceName || !designInputHtml || !userId || !password || sections.length === 0) {
     alert("Missing information.");
     return;
   }
 
-  // Only allow specific credentials
   const allowedUsers = {
     neha: "neha123",
     rahul: "rahul123"
@@ -450,9 +452,9 @@ async function finalizeDesignInput() {
     diComplete: true,
     doComplete: false,
     finalizedAt: new Date().toISOString(),
-    sections: sections // ✅ this line must be added INSIDE the object
+    sections: sections // ✅ now sections is correctly defined above
   };
-  
+
   try {
     await fetch("https://medtech-api-jjqj.onrender.com/finalize-di", {
       method: "POST",
@@ -460,11 +462,8 @@ async function finalizeDesignInput() {
       body: JSON.stringify(record)
     });
 
-    // Save user ID for the session (optional)
     localStorage.setItem("userId", userId);
-
-    // Go to status tracker
-    window.location.href = "status.html";
+    window.location.href = "status.html"; // ✅ redirect should work now
   } catch (err) {
     alert("Finalization failed.");
     console.error(err);
