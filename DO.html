@@ -56,7 +56,7 @@
 
   <script>
     
-    async function loadDO() {
+async function loadDO() {
   const index = localStorage.getItem("selectedDeviceIndex");
 
   try {
@@ -70,36 +70,44 @@
     }
 
     const device = devices[index];
-    const section = "Functional and Performance Requirements";
+    const sections = device.sections || ["Functional and Performance Requirements"]; // fallback
 
-    const payload = {
-      deviceName: device.deviceName,
-      intendedUse: device.intendedUse,
-      section: section
-    };
+    for (const section of sections) {
+      const payload = {
+        deviceName: device.deviceName,
+        intendedUse: device.intendedUse,
+        section: section
+      };
 
-    const doRes = await fetch("https://medtech-api-jjqj.onrender.com/generate-do", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+      const doRes = await fetch("https://medtech-api-jjqj.onrender.com/generate-do", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
 
-    const data = await doRes.json();
+      const data = await doRes.json();
 
-    if (data.result) {
-     const formattedHTML = formatDesignOutput(data.result);
+      if (data.result) {
+        const formattedHTML = formatDesignOutput(data.result);
 
-document.getElementById("outputContainer").innerHTML = `
-  <div class="section">
-    <h2>${section}</h2>
-    ${formatDesignOutput(data.result)}
-  </div>
-`;
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("outputContainer").style.display = "block";
-    } else {
-      throw new Error(data.error || "Unknown error");
+        document.getElementById("outputContainer").innerHTML += `
+          <div class="section">
+            <h2>${section}</h2>
+            ${formattedHTML}
+          </div>
+        `;
+      } else {
+        document.getElementById("outputContainer").innerHTML += `
+          <div class="section">
+            <h2>${section}</h2>
+            <p>❌ Error generating output for this section.</p>
+          </div>
+        `;
+      }
     }
+
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("outputContainer").style.display = "block";
 
   } catch (err) {
     document.getElementById("loading").innerHTML = `<p>❌ Failed to load design output. Please try again later.</p>`;
