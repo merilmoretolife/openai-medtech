@@ -149,7 +149,7 @@ function formatDesignOutput(markdown) {
   html = `<div class="results">` + html + `</div>`;
 
   // Final cleanup: remove multiple newlines and normalize <br>
-  html = html.replace(/\n{2,}/g, '<br><br>').replace(/\n/g, '<br>');
+  html = html.replace(/\n{2,}/g, '<br>').replace(/\n/g, '<br>');
 
   return html;
 }
