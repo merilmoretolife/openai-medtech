@@ -449,10 +449,10 @@ async function finalizeDesignInput() {
     finalizedBy: userId,
     diComplete: true,
     doComplete: false,
-    finalizedAt: new Date().toISOString()
-    sections: selectedSections   
+    finalizedAt: new Date().toISOString(),
+    sections: sections // ✅ this line must be added INSIDE the object
   };
-
+  
   try {
     await fetch("https://medtech-api-jjqj.onrender.com/finalize-di", {
       method: "POST",
