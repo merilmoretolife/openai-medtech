@@ -132,7 +132,7 @@ function formatDesignOutput(markdown) {
   html = html.replace(/^##\s*(\d+\.\s.+)$/gm, '<h3><strong>$1</strong></h3>');
 
   // Wrap tables in proper tags
-  html = html.replace(/((^\|.+\|\n)+)/gm, (match) => {
+  html = html.replace(/((^\|.*\|(\n|$))+)/gm, (match) => {
     const lines = match.trim().split("\n");
     if (lines.length < 2) return match;
 
