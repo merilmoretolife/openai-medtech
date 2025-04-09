@@ -242,7 +242,8 @@ async function downloadWord() {
     spinner.style.display = "none";
   }
 }    
-   async function generateInputs() {
+
+async function generateInputs() {
   const name = document.getElementById("deviceName").value.trim();
   const intendedUse = document.getElementById("intendedUse").value.trim();
   const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
@@ -255,6 +256,59 @@ async function downloadWord() {
     alert("Please enter a device name and select at least one section.");
     return;
   }
+
+  spinner.style.display = "block";
+  progressText.innerText = "Progress: 0%";
+  resultsDiv.innerHTML = "";
+
+  let output = "";
+  let completed = 0;
+
+  for (const section of selected) {
+    try {
+      const res = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceName: name, intendedUse: intendedUse, sections: [section] })
+      });
+
+      if (!res.ok) throw new Error("API Error");
+
+      const data = await res.json();
+      const cleaned = data.results[section].replace(/[\*#]+/g, "").trim();
+
+      output += `
+        <div class="section-block" id="section-block-${section.replace(/\s+/g, '')}">
+          <h3><strong>${section}</strong></h3>
+          <div class='results' id="result-${section.replace(/\s+/g, '')}">${cleaned}</div>
+          <label>
+            ✅ Mark Correct:
+            <input type="checkbox" class="section-ok" data-section="${section}" />
+          </label>
+          <label>
+            💬 Remarks:
+            <input type="text" class="remarks-box" id="remark-${section.replace(/\s+/g, '')}" placeholder="Enter remark for this section" />
+          </label>
+          <button onclick="updateSection('${section}')">🔄 Update</button>
+          <hr style="margin: 20px 0;">
+        </div>
+      `;
+    } catch (err) {
+      output += `<h3><strong>${section}</strong></h3><div class='results'>❌ Error loading section: ${err.message}</div>`;
+    }
+
+    completed++;
+    const percent = Math.round((completed / selected.length) * 100);
+    progressText.innerText = `Progress: ${completed}/${selected.length} (${percent}%)`;
+  }
+
+  spinner.style.display = "none";
+  progressText.innerText = "✅ Completed!";
+  resultsDiv.innerHTML = output;
+  document.getElementById("downloadButtons").style.display = "flex";
+  document.getElementById("finalizeBtn").style.display = "block";
+}
+
 
 async function updateSection(section) {
   const index = localStorage.getItem("selectedDeviceIndex");
@@ -300,58 +354,7 @@ async function updateSection(section) {
     console.error("Error updating section:", err);
     alert("❌ Something went wrong while updating.");
   }
-}
-     
-  spinner.style.display = "block";
-  progressText.innerText = "Progress: 0%";
-  resultsDiv.innerHTML = "";
-
-  let output = "";
-  let completed = 0;
-
-  for (const section of selected) {
-    try {
-      const res = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceName: name, intendedUse: intendedUse, sections: [section] })
-      });
-
-      if (!res.ok) throw new Error("API Error");
-
-      const data = await res.json();
-      const cleaned = data.results[section].replace(/[\*#]+/g, "").trim();
-output += `
-  <div class="section-block" id="section-block-${section.replace(/\s+/g, '')}">
-    <h3><strong>${section}</strong></h3>
-    <div class='results' id="result-${section.replace(/\s+/g, '')}">${cleaned}</div>
-    <label>
-      ✅ Mark Correct:
-      <input type="checkbox" class="section-ok" data-section="${section}" />
-    </label>
-    <label>
-      💬 Remarks:
-      <input type="text" class="remarks-box" id="remark-${section.replace(/\s+/g, '')}" placeholder="Enter remark for this section" />
-    </label>
-    <button onclick="updateSection('${section}')">🔄 Update</button>
-    <hr style="margin: 20px 0;">
-  </div>
-`;
-    } catch (err) {
-      output += `<h3><strong>${section}</strong></h3><div class='results'>❌ Error loading section: ${err.message}</div>`;
-    }
-
-    completed++;
-    const percent = Math.round((completed / selected.length) * 100);
-    progressText.innerText = `Progress: ${completed}/${selected.length} (${percent}%)`;
-  }
-
-  spinner.style.display = "none";
-  progressText.innerText = "✅ Completed!";
-  resultsDiv.innerHTML = output;
-  document.getElementById("downloadButtons").style.display = "flex";
-  document.getElementById("finalizeBtn").style.display = "block";
-}
+}    
     
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
