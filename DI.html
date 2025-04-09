@@ -308,41 +308,31 @@ async function generateInputs() {
   document.getElementById("finalizeBtn").style.display = "block";
 }
 
-
 async function updateSection(section) {
-  const index = localStorage.getItem("selectedDeviceIndex");
-
-  if (!index) {
-    alert("⚠️ No device index found. Please finalize a Design Input first.");
-    return;
-  }
-
+  const deviceName = document.getElementById("deviceName").value.trim();
+  const intendedUse = document.getElementById("intendedUse").value.trim();
   const remarkInput = document.getElementById(`remark-${section.replace(/\s+/g, '')}`);
   const resultDiv = document.getElementById(`result-${section.replace(/\s+/g, '')}`);
   const remark = remarkInput.value.trim();
+
+  if (!deviceName || !intendedUse) {
+    alert("Please enter both device name and intended use.");
+    return;
+  }
 
   if (!remark) {
     alert("Please enter a remark to update this section.");
     return;
   }
 
+  const payload = {
+    deviceName,
+    intendedUse,
+    section,
+    remark
+  };
+
   try {
-    const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
-    const devices = await res.json();
-
-    const device = devices[index];
-    if (!device || !device.deviceName || !device.intendedUse) {
-      alert("⚠️ Could not find valid device data. Try refreshing the page or finalizing again.");
-      return;
-    }
-
-    const payload = {
-      deviceName: device.deviceName,
-      intendedUse: device.intendedUse,
-      section: section,
-      remark: remark
-    };
-
     const response = await fetch("https://medtech-api-jjqj.onrender.com/generate-do", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
