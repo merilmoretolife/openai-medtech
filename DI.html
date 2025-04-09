@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -312,6 +311,12 @@ async function generateInputs() {
 
 async function updateSection(section) {
   const index = localStorage.getItem("selectedDeviceIndex");
+
+  if (!index) {
+    alert("⚠️ No device index found. Please finalize a Design Input first.");
+    return;
+  }
+
   const remarkInput = document.getElementById(`remark-${section.replace(/\s+/g, '')}`);
   const resultDiv = document.getElementById(`result-${section.replace(/\s+/g, '')}`);
   const remark = remarkInput.value.trim();
@@ -324,7 +329,12 @@ async function updateSection(section) {
   try {
     const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
     const devices = await res.json();
+
     const device = devices[index];
+    if (!device || !device.deviceName || !device.intendedUse) {
+      alert("⚠️ Could not find valid device data. Try refreshing the page or finalizing again.");
+      return;
+    }
 
     const payload = {
       deviceName: device.deviceName,
@@ -354,7 +364,7 @@ async function updateSection(section) {
     console.error("Error updating section:", err);
     alert("❌ Something went wrong while updating.");
   }
-}    
+}
     
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
