@@ -197,6 +197,52 @@
         if (cb !== this) cb.checked = this.checked;
       });
     });
+
+async function updateSection(section) {
+  const index = localStorage.getItem("selectedDeviceIndex");
+  const remarkInput = document.getElementById(`remark-${section.replace(/\s+/g, '')}`);
+  const resultDiv = document.getElementById(`result-${section.replace(/\s+/g, '')}`);
+  const remark = remarkInput.value.trim();
+
+  if (!remark) {
+    alert("Please enter a remark to update this section.");
+    return;
+  }
+
+  try {
+    const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
+    const devices = await res.json();
+    const device = devices[index];
+
+    const payload = {
+      deviceName: device.deviceName,
+      intendedUse: device.intendedUse,
+      section: section,
+      remark: remark
+    };
+
+    const response = await fetch("https://medtech-api-jjqj.onrender.com/generate-do", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+
+    if (result && result.result) {
+      const cleaned = result.result.replace(/[\*#]+/g, "").trim();
+      resultDiv.innerHTML = cleaned;
+      remarkInput.value = "";
+      alert("✅ Section updated based on your remark.");
+    } else {
+      resultDiv.innerHTML = `<div style="color:red;">❌ Error updating section.</div>`;
+    }
+
+  } catch (err) {
+    console.error("Error updating section:", err);
+    alert("❌ Something went wrong while updating.");
+  }
+}
     
 async function downloadWord() {
   const deviceName = document.getElementById("deviceName").value.trim();
@@ -253,96 +299,6 @@ async function downloadWord() {
   if (!name || selected.length === 0) {
     alert("Please enter a device name and select at least one section.");
     return;
-  }
-
-async function updateSection(section) {
-  const index = localStorage.getItem("selectedDeviceIndex");
-  const remarkInput = document.getElementById(`remark-${section.replace(/\s+/g, '')}`);
-  const resultDiv = document.getElementById(`result-${section.replace(/\s+/g, '')}`);
-  const remark = remarkInput.value.trim();
-
-  if (!remark) {
-    alert("Please enter a remark to update this section.");
-    return;
-  }
-
-  try {
-    const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
-    const devices = await res.json();
-    const device = devices[index];
-
-    const payload = {
-      deviceName: device.deviceName,
-      intendedUse: device.intendedUse,
-      section: section,
-      remark: remark
-    };
-
-    const response = await fetch("https://medtech-api-jjqj.onrender.com/generate-do", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const result = await response.json();
-
-    if (result && result.result) {
-      const cleaned = result.result.replace(/[\*#]+/g, "").trim();
-      resultDiv.innerHTML = cleaned;
-      remarkInput.value = "";
-      alert("✅ Section updated based on your remark.");
-    } else {
-      resultDiv.innerHTML = `<div style="color:red;">❌ Error updating section.</div>`;
-    }
-
-  } catch (err) {
-    console.error("Error updating section:", err);
-    alert("❌ Something went wrong while updating.");
-  }
-}
-     
-  spinner.style.display = "block";
-  progressText.innerText = "Progress: 0%";
-  resultsDiv.innerHTML = "";
-
-  let output = "";
-  let completed = 0;
-
-  for (const section of selected) {
-    try {
-      const res = await fetch("https://medtech-api-jjqj.onrender.com/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deviceName: name, intendedUse: intendedUse, sections: [section] })
-      });
-
-      if (!res.ok) throw new Error("API Error");
-
-      const data = await res.json();
-      const cleaned = data.results[section].replace(/[\*#]+/g, "").trim();
-output += `
-  <div class="section-block" id="section-block-${section.replace(/\s+/g, '')}">
-    <h3><strong>${section}</strong></h3>
-    <div class='results' id="result-${section.replace(/\s+/g, '')}">${cleaned}</div>
-    <label>
-      ✅ Mark Correct:
-      <input type="checkbox" class="section-ok" data-section="${section}" />
-    </label>
-    <label>
-      💬 Remarks:
-      <input type="text" class="remarks-box" id="remark-${section.replace(/\s+/g, '')}" placeholder="Enter remark for this section" />
-    </label>
-    <button onclick="updateSection('${section}')">🔄 Update</button>
-    <hr style="margin: 20px 0;">
-  </div>
-`;
-    } catch (err) {
-      output += `<h3><strong>${section}</strong></h3><div class='results'>❌ Error loading section: ${err.message}</div>`;
-    }
-
-    completed++;
-    const percent = Math.round((completed / selected.length) * 100);
-    progressText.innerText = `Progress: ${completed}/${selected.length} (${percent}%)`;
   }
 
   spinner.style.display = "none";
