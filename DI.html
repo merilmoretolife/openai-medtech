@@ -313,40 +313,53 @@ async function generateInputs() {
 }
 
 async function updateSection(section) {
-  const sectionId = section.replace(/\s+/g, '');
-  const spinner = document.getElementById(`spinner-${sectionId}`);
-  const resultDiv = document.getElementById(`result-${sectionId}`);
-  const remarkText = document.getElementById(`remark-${sectionId}`).value.trim();
-  const originalContent = resultDiv.innerText;
+  const remarkBox = document.getElementById(`remark-${section.replace(/\s+/g, '')}`);
+  const currentContentDiv = document.getElementById(`result-${section.replace(/\s+/g, '')}`);
+  const updateButton = remarkBox.nextElementSibling; // Assuming button is placed after input
+  const spinner = document.createElement('span');
+  spinner.className = 'small-spinner';
+  spinner.innerText = '⏳';
+  updateButton.disabled = true;
+  updateButton.appendChild(spinner);
 
-  if (!remarkText) {
-    alert("❗ Please enter a remark for this section.");
+  const remark = remarkBox.value.trim();
+  const currentContent = currentContentDiv.innerText.trim();
+  const deviceName = document.getElementById("deviceName").value.trim();
+  const intendedUse = document.getElementById("intendedUse").value.trim();
+
+  if (!remark) {
+    alert("Please enter a remark.");
+    updateButton.disabled = false;
+    updateButton.removeChild(spinner);
     return;
   }
-
-  spinner.style.display = "inline-block";
 
   try {
     const res = await fetch("https://medtech-api-jjqj.onrender.com/update-section", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        deviceName,
+        intendedUse,
         section,
-        originalContent,
-        remark: remarkText
+        currentContent,
+        remark
       })
     });
 
-    if (!res.ok) throw new Error("❌ Update failed");
-
     const data = await res.json();
-    resultDiv.innerText = data.result;
-    document.getElementById(`remark-${sectionId}`).value = "";
+    if (res.ok && data.result) {
+      currentContentDiv.innerText = data.result;
+    } else {
+      alert("❌ Update failed");
+      console.error(data);
+    }
   } catch (err) {
-    alert("Update failed: " + err.message);
+    alert("❌ Error during update");
     console.error(err);
   } finally {
-    spinner.style.display = "none";
+    updateButton.disabled = false;
+    updateButton.removeChild(spinner);
   }
 }
     
