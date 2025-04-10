@@ -315,12 +315,10 @@ async function generateInputs() {
 async function updateSection(section) {
   const remarkBox = document.getElementById(`remark-${section.replace(/\s+/g, '')}`);
   const currentContentDiv = document.getElementById(`result-${section.replace(/\s+/g, '')}`);
-  const updateButton = remarkBox.nextElementSibling; // Assuming button is placed after input
-  const spinner = document.createElement('span');
-  spinner.className = 'small-spinner';
-  spinner.innerText = '⏳';
-  updateButton.disabled = true;
-  updateButton.appendChild(spinner);
+  const updateButton = document.getElementById(`updateBtn-${section.replace(/\s+/g, '')}`);
+ const spinner = document.getElementById(`spinner-${section.replace(/\s+/g, '')}`);
+ updateButton.disabled = true;
+ spinner.style.display = "inline-block";
 
   const remark = remarkBox.value.trim();
   const currentContent = currentContentDiv.innerText.trim();
@@ -330,7 +328,7 @@ async function updateSection(section) {
   if (!remark) {
     alert("Please enter a remark.");
     updateButton.disabled = false;
-    updateButton.removeChild(spinner);
+    spinner.style.display = "none";
     return;
   }
 
