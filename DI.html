@@ -316,7 +316,7 @@ async function generateInputs() {
 async function updateSection(section) {
   const remarkBox = document.getElementById(`remark-${section.replace(/\s+/g, '')}`);
   const currentContentDiv = document.getElementById(`result-${section.replace(/\s+/g, '')}`);
-  const updateButton = remarkBox.nextElementSibling; // Assuming button is placed after input
+  const updateButton = document.getElementById(`updateBtn-${section.replace(/\s+/g, '')}`);
   const spinner = document.createElement('span');
   spinner.className = 'small-spinner';
   spinner.innerText = '⏳';
