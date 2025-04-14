@@ -115,7 +115,48 @@ async function loadDO() {
 
     document.getElementById("loading").style.display = "none";
     document.getElementById("outputContainer").style.display = "block";
-    document.getElementById("downloadBtnWrapper").style.display = "block";
+const downloadButton = document.createElement("button");
+downloadButton.innerHTML = '⬇️ Download Word File';
+downloadButton.id = "downloadBtn";
+downloadButton.style.backgroundColor = '#007bff';
+downloadButton.style.color = 'white';
+downloadButton.style.border = 'none';
+downloadButton.style.padding = '12px 20px';
+downloadButton.style.fontSize = '16px';
+downloadButton.style.borderRadius = '5px';
+downloadButton.style.cursor = 'pointer';
+downloadButton.style.marginTop = '20px';
+downloadButton.onclick = async () => {
+  const originalText = downloadButton.innerHTML;
+  downloadButton.innerHTML = `<div class="spinner" style="border: 4px solid #fff; border-top: 4px solid #000; width: 18px; height: 18px; display: inline-block; vertical-align: middle;"></div> Downloading...`;
+  try {
+    const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-do-docx", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        deviceName: device.deviceName,
+        intendedUse: device.intendedUse,
+        sections: device.sections
+      })
+    });
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Design_Output_${device.deviceName.replace(/ /g, "_")}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("❌ Error downloading Word file:", err);
+    alert("Download failed. Please try again.");
+  }
+  downloadButton.innerHTML = originalText;
+};
+
+document.body.appendChild(downloadButton);
 
   } catch (err) {
     document.getElementById("loading").innerHTML = `<p>❌ Failed to load design output. Please try again later.</p>`;
