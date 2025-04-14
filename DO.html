@@ -53,9 +53,13 @@
   </div>
   <div id="outputContainer" style="display: none;"></div>
   <div id="doResult" style="white-space: normal; background: #111; color: white; padding: 20px; border-radius: 10px; margin-top: 20px;"></div>
-  <div style="text-align: center; margin-top: 30px;">
-  <button id="downloadDOdocx" style="padding: 10px 20px; font-size: 16px;">Download Word (Design Output)</button>
-  </div>
+  <!-- Blue Download Button -->
+<div style="text-align: center; margin-top: 30px; display: none;" id="downloadBtnWrapper">
+  <button id="downloadDocxBtn" style="background-color: #007BFF; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer;">
+    ⬇️ Download Word
+  </button>
+  <div id="downloadSpinner" class="spinner" style="display: none; margin-top: 10px;"></div>
+</div>
 
   <script>
     
@@ -111,6 +115,7 @@ async function loadDO() {
 
     document.getElementById("loading").style.display = "none";
     document.getElementById("outputContainer").style.display = "block";
+    document.getElementById("downloadBtnWrapper").style.display = "block";
 
   } catch (err) {
     document.getElementById("loading").innerHTML = `<p>❌ Failed to load design output. Please try again later.</p>`;
@@ -165,33 +170,22 @@ function formatDesignOutput(markdown) {
   return html;
 }
 
-document.getElementById("downloadDOdocx").addEventListener("click", async () => {
-  const index = localStorage.getItem("selectedDeviceIndex");
+document.getElementById("downloadDocxBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("downloadDocxBtn");
+  const spinner = document.getElementById("downloadSpinner");
+  btn.disabled = true;
+  spinner.style.display = "block";
 
   try {
+    const index = localStorage.getItem("selectedDeviceIndex");
     const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
     const devices = await res.json();
-
-    if (!devices || !devices[index]) {
-      alert("❌ Finalized device not found.");
-      return;
-    }
-
     const device = devices[index];
-    const sections = device.sections || [];
-    const results = {};
-
-    const sectionDivs = document.querySelectorAll(".section");
-    sections.forEach((section, i) => {
-      const content = sectionDivs[i]?.innerText || "";
-      results[section] = content;
-    });
 
     const payload = {
       deviceName: device.deviceName,
       intendedUse: device.intendedUse,
-      sections: sections,
-      results: results
+      sections: device.sections
     };
 
     const response = await fetch("https://medtech-api-jjqj.onrender.com/generate-do-docx", {
@@ -200,23 +194,19 @@ document.getElementById("downloadDOdocx").addEventListener("click", async () => 
       body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      alert("❌ Failed to download Design Output Word file.");
-      return;
-    }
+    if (!response.ok) throw new Error("Download failed");
 
     const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = url;
-    link.download = `Design_Output_${device.deviceName.replace(/\s+/g, "_")}.docx`;
-    document.body.appendChild(link);
+    link.href = URL.createObjectURL(blob);
+    link.download = `Design_Output_${device.deviceName.replace(/ /g, "_")}.docx`;
     link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
   } catch (error) {
-    console.error("❌ Error downloading Word file:", error);
-    alert("❌ An error occurred while downloading the Word file.");
+    alert("❌ Error downloading Word file.");
+    console.error(error);
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = "none";
   }
 });
     
