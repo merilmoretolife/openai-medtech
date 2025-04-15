@@ -62,7 +62,8 @@
 </div>
 
   <script>
-    
+  const doResults = {}; // ✅ store section-wise generated content for Word export
+ 
 async function loadDO() {
   const index = localStorage.getItem("selectedDeviceIndex");
 
@@ -95,7 +96,8 @@ async function loadDO() {
       const data = await doRes.json();
 
       if (data.result) {
-        const formattedHTML = formatDesignOutput(data.result);
+  doResults[section] = data.result; // ✅ Store raw result for Word download
+  const formattedHTML = formatDesignOutput(data.result);
 
         document.getElementById("outputContainer").innerHTML += `
           <div class="section">
@@ -134,10 +136,11 @@ downloadButton.onclick = async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        deviceName: device.deviceName,
-        intendedUse: device.intendedUse,
-        sections: device.sections
-      })
+  deviceName: device.deviceName,
+  intendedUse: device.intendedUse,
+  sections: device.sections,
+  results: doResults   // ✅ send generated content for export
+})
     });
 
     const blob = await res.blob();
