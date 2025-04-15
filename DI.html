@@ -282,10 +282,6 @@ async function generateInputs() {
     <h3><strong>${section}</strong></h3>
     <div class='results' id="result-${section.replace(/\s+/g, '')}">${cleaned}</div>
     <label>
-      ✅ Mark Correct:
-      <input type="checkbox" class="section-ok" data-section="${section}" />
-    </label>
-    <label>
       💬 Remarks:
       <input type="text" class="remarks-box" id="remark-${section.replace(/\s+/g, '')}" placeholder="Enter remark for this section" />
     </label>
