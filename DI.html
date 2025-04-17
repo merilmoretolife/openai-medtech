@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -103,6 +101,22 @@
       display: block;
       margin-top: 20px;
     }
+
+    /* Hide the PDF button */
+#downloadPdfBtn {
+  display: none !important;
+}
+
+/* Let the Word button fill the full width formerly shared by both buttons */
+.btn-group {
+  display: flex;
+}
+#downloadWordBtn {
+  flex: 1;
+  /* if you want it to literally stretch the same height too: */
+  height: 100%;
+}
+
   </style>
  <style>
   .doc-container {
