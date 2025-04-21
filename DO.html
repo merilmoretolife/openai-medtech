@@ -64,7 +64,7 @@
 
   <script>
   const doResults = {}; // ✅ store section-wise generated content for Word export
- 
+
 async function loadDO() {
   const index = localStorage.getItem("selectedDeviceIndex");
 
@@ -79,94 +79,101 @@ async function loadDO() {
     }
 
     const device = devices[index];
-    const sections = device.sections || ["Functional and Performance Requirements"]; // fallback
 
-    for (const section of sections) {
-      const payload = {
-        deviceName: device.deviceName,
-        intendedUse: device.intendedUse,
-        section: section
-      };
+    // ✅ 1. Get previously saved Design Input content
+    const diResultRes = await fetch("https://medtech-api-jjqj.onrender.com/finalized-di-result", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ deviceName: device.deviceName })
+    });
+    const diData = await diResultRes.json();
 
-      const doRes = await fetch("https://medtech-api-jjqj.onrender.com/generate-do", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await doRes.json();
-
-      if (data.result) {
-  doResults[section] = data.result; // ✅ Store raw result for Word download
-  const formattedHTML = formatDesignOutput(data.result);
-
-        document.getElementById("outputContainer").innerHTML += `
-          <div class="section">
-            <h2>${section}</h2>
-            ${formattedHTML}
-          </div>
-        `;
-      } else {
-        document.getElementById("outputContainer").innerHTML += `
-          <div class="section">
-            <h2>${section}</h2>
-            <p>❌ Error generating output for this section.</p>
-          </div>
-        `;
-      }
-    }
-
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("outputContainer").style.display = "block";
-const downloadButton = document.createElement("button");
-downloadButton.innerHTML = '⬇️ Download Word File';
-downloadButton.id = "downloadBtn";
-downloadButton.style.backgroundColor = '#007bff';
-downloadButton.style.color = 'white';
-downloadButton.style.border = 'none';
-downloadButton.style.padding = '12px 20px';
-downloadButton.style.fontSize = '16px';
-downloadButton.style.borderRadius = '5px';
-downloadButton.style.cursor = 'pointer';
-downloadButton.style.marginTop = '20px';
-downloadButton.onclick = async () => {
-  const originalText = downloadButton.innerHTML;
-  downloadButton.innerHTML = `<div class="spinner" style="border: 4px solid #fff; border-top: 4px solid #000; width: 18px; height: 18px; display: inline-block; vertical-align: middle;"></div> Downloading...`;
-  try {
-    const res = await fetch("https://medtech-api-jjqj.onrender.com/generate-do-docx", {
+    // ✅ 2. Extract selectable options from DI
+    const parsedRes = await fetch("https://medtech-api-jjqj.onrender.com/parse-options", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-  deviceName: device.deviceName,
-  intendedUse: device.intendedUse,
-  sections: device.sections,
-  results: doResults   // ✅ send generated content for export
-})
+        deviceName: device.deviceName,
+        intendedUse: device.intendedUse,
+        sections: device.sections,
+        results: diData.results
+      })
     });
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Design_Output_${device.deviceName.replace(/ /g, "_")}.docx`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error("❌ Error downloading Word file:", err);
-    alert("Download failed. Please try again.");
-  }
-  downloadButton.innerHTML = originalText;
-};
+    const parsed = await parsedRes.json();
 
-document.body.appendChild(downloadButton);
+    // ✅ 3. Show checkboxes before DO generation
+    let html = "";
+    for (const section of device.sections) {
+      const options = parsed.parsed[section] || [];
+      html += `<div class="section"><h2>${section}</h2>`;
+      html += options.length
+        ? options.map(opt => `<label><input type="checkbox" data-section="${section}" value="${opt}" checked> ${opt}</label><br>`).join("")
+        : `<p>No options to select. Proceeding with default content.</p>`;
+      html += `</div>`;
+    }
+    html += `<button id="generateDOBtn" style="background:#007BFF;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;">Generate Output</button>`;
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("outputContainer").innerHTML = html;
+    document.getElementById("outputContainer").style.display = "block`;
+
+    // ✅ 4. Handle button click
+    document.getElementById("generateDOBtn").addEventListener("click", async () => {
+      document.getElementById("generateDOBtn").style.display = "none";
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("outputContainer").style.display = "none`;
+
+      const selectedMap = {};
+      document.querySelectorAll("input[type='checkbox']:checked").forEach(cb => {
+        const section = cb.getAttribute("data-section");
+        selectedMap[section] = selectedMap[section] || [];
+        selectedMap[section].push(cb.value);
+      });
+
+      for (const section of device.sections) {
+        const payload = {
+          deviceName: device.deviceName,
+          intendedUse: device.intendedUse,
+          section: section,
+          selected: selectedMap[section] || []
+        };
+
+        const doRes = await fetch("https://medtech-api-jjqj.onrender.com/generate-do", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await doRes.json();
+
+        if (data.result) {
+          doResults[section] = data.result;
+          const formattedHTML = formatDesignOutput(data.result);
+          document.getElementById("outputContainer").innerHTML += `
+            <div class="section">
+              <h2>${section}</h2>
+              ${formattedHTML}
+            </div>`;
+        } else {
+          document.getElementById("outputContainer").innerHTML += `
+            <div class="section">
+              <h2>${section}</h2>
+              <p>❌ Error generating output for this section.</p>
+            </div>`;
+        }
+      }
+
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("outputContainer").style.display = "block";
+      document.getElementById("downloadBtnWrapper").style.display = "block";
+    });
 
   } catch (err) {
-    document.getElementById("loading").innerHTML = `<p>❌ Failed to load design output. Please try again later.</p>`;
     console.error(err);
+    document.getElementById("loading").innerHTML = `<p>❌ Failed to load Design Output. Please try again later.</p>`;
   }
 }
+
     window.onload = loadDO;
 
 function formatDesignOutput(markdown) {
