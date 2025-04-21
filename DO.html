@@ -82,7 +82,7 @@ async function loadDO() {
     const device = devices[index];
 
     // ✅ 1. Get previously saved Design Input content
-    const diResultRes = await fetch("https://medtech-api-jjqj.onrender.com/finalized-di-result", {
+    const diResultRes = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ deviceName: device.deviceName })
