@@ -102,7 +102,7 @@ async function loadDO() {
     // ✅ 3. Show checkboxes before DO generation
     let html = "";
     for (const section of device.sections) {
-      const options = parsed.parsed[section] || [];
+      const options = parsed[section] || [];
       html += `<div class="section"><h2>${section}</h2>`;
       html += options.length
         ? options.map(opt => `<label><input type="checkbox" data-section="${section}" value="${opt}" checked> ${opt}</label><br>`).join("")
