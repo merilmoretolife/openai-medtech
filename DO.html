@@ -84,7 +84,6 @@ async function loadDO() {
     const diResultRes = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
     const diDevices = await diResultRes.json();
     const diData = diDevices.find(d => d.deviceName === device.deviceName);
-    const diData = diDevices.find(d => d.deviceName === device.deviceName);
 
     // ✅ 2. Extract selectable options from DI
     const parsedRes = await fetch("https://medtech-api-jjqj.onrender.com/parse-options", {
