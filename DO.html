@@ -65,6 +65,8 @@
   <script>
   const doResults = {}; // ✅ store section-wise generated content for Word export
 
+const doResults = {}; // ✅ store section-wise generated content for Word export
+
 async function loadDO() {
   const index = localStorage.getItem("selectedDeviceIndex");
 
@@ -112,16 +114,18 @@ async function loadDO() {
         : `<p>No options to select. Proceeding with default content.</p>`;
       html += `</div>`;
     }
-    html += `<button id="generateDOBtn" style="background:#007BFF;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;">Generate Output</button>`;
+
+    html += `<button id="generateDOBtn" style="background:#007BFF;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;margin-top:20px;">Generate Output</button>`;
+
     document.getElementById("loading").style.display = "none";
     document.getElementById("outputContainer").innerHTML = html;
-    document.getElementById("outputContainer").style.display = "block`;
+    document.getElementById("outputContainer").style.display = "block";
 
-    // ✅ 4. Handle button click
+    // ✅ 4. Handle Generate button click
     document.getElementById("generateDOBtn").addEventListener("click", async () => {
       document.getElementById("generateDOBtn").style.display = "none";
       document.getElementById("loading").style.display = "block";
-      document.getElementById("outputContainer").style.display = "none`;
+      document.getElementById("outputContainer").innerHTML = ""; // clear options
 
       const selectedMap = {};
       document.querySelectorAll("input[type='checkbox']:checked").forEach(cb => {
@@ -164,7 +168,6 @@ async function loadDO() {
       }
 
       document.getElementById("loading").style.display = "none";
-      document.getElementById("outputContainer").style.display = "block";
       document.getElementById("downloadBtnWrapper").style.display = "block";
     });
 
