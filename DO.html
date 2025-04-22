@@ -83,8 +83,8 @@ async function loadDO() {
 
     const diResultRes = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
     const diDevices = await diResultRes.json();
-    const diData = diDevices.find(d => d.deviceName === device.deviceName);
 
+    const diData = diDevices.find(d => d.deviceName === device.deviceName);
     const parsedRes = await fetch("https://medtech-api-jjqj.onrender.com/extract-options", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
@@ -92,8 +92,9 @@ async function loadDO() {
     deviceName: device.deviceName,
     intendedUse: device.intendedUse,
     sections: device.sections,
-    results: diData.designInputHtml // ✅ use DI HTML from backend
+    designInputHtml: diData.designInputHtml  // ✅ pass the HTML block
   })
+});
 });
 
     const parsed = await parsedRes.json();
