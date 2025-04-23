@@ -85,6 +85,7 @@ async function loadDO() {
     const diDevices = await diResultRes.json();
 
     const diData = diDevices.find(d => d.deviceName === device.deviceName);
+    console.log("HTML being sent to extract-options:", diData.designInputHtml);
     const parsedRes = await fetch("https://medtech-api-jjqj.onrender.com/extract-options", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
