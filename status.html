@@ -19,10 +19,15 @@
     appId: "1:246226348117:web:ab8471e22a10ace7104cdc"
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const database = getDatabase(app);
 
-  window.database = database; // Expose it to non-module script below
+  // Expose these for non-module scripts
+  window.database = database;
+  window.ref = ref;
+  window.child = child;
+  window.get = get;
 </script>
   
   <style>
