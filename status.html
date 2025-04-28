@@ -208,6 +208,18 @@
       return Array.from(headings).map(h => h.innerText.trim());
     }
 
+async function saveDeviceToFirebase(device) {
+  const deviceRef = database.ref('devices').push();
+  await deviceRef.set({
+    deviceName: device.deviceName,
+    finalizedBy: device.finalizedBy,
+    finalizedAt: device.finalizedAt,
+    diComplete: device.diComplete,
+    doComplete: device.doComplete,
+    intendedUse: device.intendedUse,
+    designInputHtml: device.designInputHtml
+  });
+}   
     window.onload = loadData;
   </script>
 </body>
