@@ -108,18 +108,21 @@
   <script>
     let data = [];
 
-    async function loadData() {
-      try {
-        const res = await fetch("https://medtech-api-jjqj.onrender.com/finalized-devices");
-        if (!res.ok) throw new Error("Failed to fetch finalized devices");
-        data = await res.json();
-        renderTable();
-      } catch (err) {
-        console.error("Load failed:", err);
-        const tbody = document.querySelector("#statusTable tbody");
-        tbody.innerHTML = `<tr><td colspan="7">Error loading data</td></tr>`;
-      }
-    }
+async function loadData() {
+  try {
+    const snapshot = await get(ref(database, 'devices'));
+    if (!snapshot.exists()) throw new Error("No devices found in Firebase");
+
+    const devicesObject = snapshot.val();
+    data = Object.values(devicesObject); // Convert {key1: {...}, key2: {...}} to [{...}, {...}]
+
+    renderTable();
+  } catch (err) {
+    console.error("Load failed:", err);
+    const tbody = document.querySelector("#statusTable tbody");
+    tbody.innerHTML = `<tr><td colspan="7">Error loading data</td></tr>`;
+  }
+}
 
     function renderTable() {
       const tbody = document.querySelector("#statusTable tbody");
