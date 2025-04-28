@@ -116,12 +116,13 @@
 
 async function loadData() {
   try {
-    const dbRef = ref(window.database);
-    const snapshot = await get(child(dbRef, 'devices'));
-    if (!snapshot.exists()) throw new Error("No data available");
-
-    // Convert Firebase object {id1: {...}, id2: {...}} into array
-    data = Object.values(snapshot.val());
+    const dbRef = ref(database, 'devices');
+    const snapshot = await get(dbRef);
+    if (!snapshot.exists()) {
+      throw new Error("No data available");
+    }
+    const firebaseData = snapshot.val();
+    data = Object.values(firebaseData);
     renderTable();
   } catch (err) {
     console.error("Load failed:", err);
@@ -129,7 +130,6 @@ async function loadData() {
     tbody.innerHTML = `<tr><td colspan="7">Error loading data</td></tr>`;
   }
 }
-
     function renderTable() {
       const tbody = document.querySelector("#statusTable tbody");
       tbody.innerHTML = "";
