@@ -162,6 +162,30 @@
 </style>
   
 </head>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyASIJauTTobtyVe2Ff3KMzo-RTAwy6cOPc",
+    authDomain: "medtech--api.firebaseapp.com",
+    databaseURL: "https://medtech--api-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "medtech--api",
+    storageBucket: "medtech--api.appspot.com",
+    messagingSenderId: "246226348117",
+    appId: "1:246226348117:web:ab8471e22a10ace7104cdc"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+
+  window.database = database;
+  window.ref = ref;
+  window.push = push;
+  window.set = set;
+</script>
+  
 <body>
   <a href="history.html" style="display: none;">View Export History</a>
   <div class="container">
@@ -507,7 +531,7 @@ async function finalizeDesignInput() {
   const designInputHtml = document.getElementById("results").innerHTML;
 
   const checkboxes = document.querySelectorAll("#sectionCheckboxes input[type=checkbox]:checked");
-  const sections = Array.from(checkboxes).map(cb => cb.value); // ✅ DEFINE THIS FIRST!
+  const sections = Array.from(checkboxes).map(cb => cb.value);
 
   const userId = prompt("Enter user ID:");
   const password = prompt("Enter password:");
@@ -532,41 +556,32 @@ async function finalizeDesignInput() {
     intendedUse,
     designInputHtml,
     finalizedBy: userId,
+    finalizedAt: new Date().toISOString(),
     diComplete: true,
     doComplete: false,
-    finalizedAt: new Date().toISOString(),
-    sections: sections // ✅ now sections is correctly defined above
+    sections: sections
   };
 
   try {
+    // 1. Save to Render server
     await fetch("https://medtech-api-jjqj.onrender.com/finalize-di", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(record)
     });
 
+    // 2. Save to Firebase
+    await saveDeviceToFirebase(record);
+
+    alert("✅ Design Input finalized successfully!");
     localStorage.setItem("userId", userId);
-    window.location.href = "status.html"; // ✅ redirect should work now
+    window.location.href = "status.html";
   } catch (err) {
-    alert("Finalization failed.");
+    alert("❌ Finalization failed.");
     console.error(err);
   }
 }
-    
-async function promptForCredentials() {
-  const userId = prompt("Enter your User ID:");
-  const password = prompt("Enter your password:");
 
-  const users = {
-    "neha": "1234",
-    "rahul": "abcd"
-  };
-
-  if (users[userId] === password) return userId;
-
-  alert("❌ Invalid credentials.");
-  return null;
-}
   </script>
 
 <div id="wordTemplate" style="display: none;">
