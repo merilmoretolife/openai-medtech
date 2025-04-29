@@ -525,6 +525,21 @@ async function updateSection(section) {
       localStorage.setItem("downloadHistory", JSON.stringify(history));
     }
 
+async function saveDeviceToFirebase(device) {
+  const deviceListRef = ref(database, 'devices');
+  const newDeviceRef = push(deviceListRef);
+  await set(newDeviceRef, {
+    deviceName: device.deviceName,
+    intendedUse: device.intendedUse,
+    designInputHtml: device.designInputHtml,
+    finalizedBy: device.finalizedBy,
+    finalizedAt: device.finalizedAt,
+    diComplete: true,
+    doComplete: false,
+    sections: device.sections
+  });
+}
+    
 async function finalizeDesignInput() {
   const deviceName = document.getElementById("deviceName").value.trim();
   const intendedUse = document.getElementById("intendedUse").value.trim();
